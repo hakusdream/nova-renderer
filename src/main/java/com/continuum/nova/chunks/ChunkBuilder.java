@@ -14,7 +14,6 @@ import net.minecraft.world.World;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.swing.text.html.Option;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -60,12 +59,12 @@ public class ChunkBuilder {
         for(String filterName : blocksForFilter.keySet()) {
             Optional<NovaNative.mc_chunk_render_object> renderObj = makeMeshForBlocks(blocksForFilter.get(filterName), world, new BlockPos(range.min.x, range.min.y, range.min.z));
             renderObj.ifPresent(obj -> {
-                // obj.id = chunkHashCode;
+                obj.id = chunkHashCode;
                 obj.x = range.min.x;
                 obj.y = range.min.y;
                 obj.z = range.min.z;
 
-                NovaNative.INSTANCE.add_chunk_geometry_for_filter(filterName, obj);
+                NovaNative.INSTANCE.set_chunk_geometry_for_filter(filterName, obj);
             });
         }
 
@@ -195,18 +194,5 @@ public class ChunkBuilder {
 
     public void setWorld(World world) {
         this.world = world;
-    }
-
-    /**
-     * Returns the IBlockState of the block next to the block at the provided position in the given direction
-     *
-     * @param pos The position to get the block next to
-     * @param world The world that all these blocks are in
-     * @param direction The direction to look in
-     * @return The IBlockState of the block in the provided direction
-     */
-    private static IBlockState blockNextTo(BlockPos pos, World world, EnumFacing direction) {
-        BlockPos lookupPos = pos.add(direction.getDirectionVec());
-        return world.getBlockState(lookupPos);
     }
 }

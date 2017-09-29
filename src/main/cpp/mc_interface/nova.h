@@ -63,7 +63,7 @@ NOVA_API void reset_texture_manager();
  *
  * \param chunk The chunk to add to Nova
  */
-NOVA_API void add_chunk_geometry_for_filter(const char* filter_name, mc_chunk_render_object* chunk);
+NOVA_API void set_chunk_geometry_for_filter(const char* filter_name, mc_chunk_render_object* chunk);
 
 /*!
  * \brief Updates the Nova Renderer and renders the current frame

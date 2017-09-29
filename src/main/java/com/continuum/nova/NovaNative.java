@@ -265,7 +265,7 @@ public interface NovaNative extends Library {
 
     void reset_texture_manager();
 
-    void add_chunk_geometry_for_filter(String filter_name, mc_chunk_render_object render_object);
+    void set_chunk_geometry_for_filter(String filter_name, mc_chunk_render_object render_object);
 
     boolean should_close();
 

@@ -51,10 +51,6 @@ public class NovaRenderer implements IResourceManagerReloadListener {
     private TextureMap guiAtlas = new TextureMap("textures");
     private Map<ResourceLocation, TextureAtlasSprite> guiSpriteLocations = new HashMap<>();
 
-    private static final List<ResourceLocation> BLOCK_COLOR_TEXTURES_LOCATIONS = new ArrayList<>();
-    private TextureMap blockAtlas = new TextureMap("textures");
-    private Map<ResourceLocation, TextureAtlasSprite> blockSpriteLocations = new HashMap<>();
-
     private static final List<ResourceLocation> FONT_COLOR_TEXTURES_LOCATIONS = new ArrayList<>();
     private TextureMap fontAtlas = new TextureMap("textures");
     private Map<ResourceLocation, TextureAtlasSprite> fontSpriteLocations = new HashMap<>();
@@ -78,12 +74,9 @@ public class NovaRenderer implements IResourceManagerReloadListener {
     final private Executor chunkUpdateThreadPool = Executors.newFixedThreadPool(10);
 
     private ChunkBuilder chunkBuilder;
-    private BlockModelShapes blockModelShapes;
-    private HashMap<String, IGeometryFilter> filterMap;
 
     public NovaRenderer() {
         // I put these in Utils to make this class smaller
-        Utils.initBlockTextureLocations(BLOCK_COLOR_TEXTURES_LOCATIONS);
         Utils.initGuiTextureLocations(GUI_COLOR_TEXTURES_LOCATIONS);
         Utils.initFontTextureLocations(FONT_COLOR_TEXTURES_LOCATIONS);
         Utils.initFreeTextures(FREE_TEXTURES);
@@ -175,6 +168,7 @@ public class NovaRenderer implements IResourceManagerReloadListener {
         NovaNative.INSTANCE.add_texture(atlasTexture);
 
         for (TextureAtlasSprite sprite : spriteLocations.values()) {
+            LOG.debug("Setting location for sprite {}", sprite);
             NovaNative.mc_texture_atlas_location location = new NovaNative.mc_texture_atlas_location(
                     sprite.getIconName(),
                     sprite.getMinU(),
@@ -380,19 +374,13 @@ public class NovaRenderer implements IResourceManagerReloadListener {
     public static String atlasTextureOfSprite(ResourceLocation texture) {
         ResourceLocation strippedLocation = new ResourceLocation(texture.getResourceDomain(), texture.getResourcePath().replace(".png", "").replace("textures/", ""));
 
-        if (BLOCK_COLOR_TEXTURES_LOCATIONS.contains(strippedLocation)) {
-            return BLOCK_COLOR_ATLAS_NAME;
-        } else if (GUI_COLOR_TEXTURES_LOCATIONS.contains(strippedLocation) || texture == WHITE_TEXTURE_GUI_LOCATION) {
+        if (GUI_COLOR_TEXTURES_LOCATIONS.contains(strippedLocation) || texture == WHITE_TEXTURE_GUI_LOCATION) {
             return GUI_ATLAS_NAME;
         } else if (FONT_COLOR_TEXTURES_LOCATIONS.contains(strippedLocation)) {
             return FONT_ATLAS_NAME;
         }
 
         return texture.toString();
-    }
-
-    public void setBlockModelShapes(BlockModelShapes shapes) {
-        blockModelShapes = shapes;
     }
 
     public void loadShaderpack(String shaderpackName) {
@@ -405,7 +393,7 @@ public class NovaRenderer implements IResourceManagerReloadListener {
         Profiler.start("build_filters");
         String[] filtersSplit = filters.split("\n");
 
-        filterMap = new HashMap<>();
+        HashMap<String, IGeometryFilter> filterMap = new HashMap<>();
         for(int i = 0; i < filtersSplit.length; i += 2) {
             String filterName = filtersSplit[i];
             IGeometryFilter filter = IGeometryFilter.parseFilterString(filtersSplit[i + 1]);

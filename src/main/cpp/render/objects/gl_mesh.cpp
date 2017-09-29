@@ -124,9 +124,10 @@ namespace nova {
                 glEnableVertexAttribArray(2);   // Lightmap UV
                 glEnableVertexAttribArray(3);   // Normal
                 glEnableVertexAttribArray(4);   // Tangent
+                glEnableVertexAttribArray(5);   // Vertex color
 
                 glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 13 * sizeof(GLfloat), nullptr);
-                glVertexAttribPointer(5, 1, GL_FLOAT, GL_FALSE, 13 * sizeof(GLfloat), (void *) (1 * sizeof(GLfloat)));
+                glVertexAttribPointer(5, 4, GL_BYTE,  GL_FALSE, 13 * sizeof(GLfloat), (void *) (1 * sizeof(GLfloat)));
                 glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 13 * sizeof(GLfloat), (void *) (4 * sizeof(GLfloat)));
                 glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 13 * sizeof(GLfloat), (void *) (6 * sizeof(GLfloat)));
                 glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 13 * sizeof(GLfloat), (void *) (8 * sizeof(GLfloat)));
