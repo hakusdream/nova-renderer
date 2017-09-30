@@ -6,6 +6,8 @@ copy /y nul mc_from_git
 mkdir C:\WINDOWS\system32\config\systemprofile\AppData\Roaming\.minecraft\versions\1.10\
 set MCP_LOC=C:\Users\gold1\AppData\Roaming\.minecraft
 
+echo MCP Location: %MCP_LOC%
+
 rem Nova setup
 gradlew setup
 
