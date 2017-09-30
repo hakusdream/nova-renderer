@@ -5,6 +5,9 @@ echo This is the build script for Jenkins to run. If you ware not Jenkins, you s
 rem Environment setup
 set JAVA_HOME=E:\Program Files\Java\jdk1.8.0_121
 copy /y nul mc_from_git
+mkdir C:\WINDOWS\system32\config\systemprofile\AppData\Roaming\.minecraft\versions\1.10\
+copy /Y C:\Users\gold1\AppData\Roaming\.minecraft\versions\1.10\1.10.json C:\WINDOWS\system32\config\systemprofile\AppData\Roaming\.minecraft\versions\1.10\1.10.json
+copy /Y C:\Users\gold1\AppData\Roaming\.minecraft\versions\1.10\1.10.jar C:\WINDOWS\system32\config\systemprofile\AppData\Roaming\.minecraft\versions\1.10\1.10.jar
 
 rem Nova setup
 gradlew setup
