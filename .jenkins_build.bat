@@ -2,9 +2,11 @@
 
 echo This is the build script for Jenkins to run. If you ware not Jenkins, you should not be running this script. It will not work and I will not support you.
 
+rem Environment setup
 set JAVA_HOME=E:\Program Files\Java\jdk1.8.0_121
 copy /y nul mc_from_git
 
+rem Nova setup
 gradlew setup
 
 cd src/main/java
@@ -15,15 +17,21 @@ git checkout chunks
 cd ../../../../
 mkdir jars\libraries
 mkdir jars\versions\1.10\1.10-natives
-xcopy /E /I "E:\Documents\nova-renderer\jars\libraries" "jars\libraries"
-xcopy /E /I "E:\Documents\nova-renderer\src\main\java\mcp" "src\main\java\mcp"
+xcopy /E /Y /I "E:\Documents\nova-renderer\jars\libraries" "jars\libraries"
+xcopy /E /Y /I "E:\Documents\nova-renderer\src\main\java\mcp" "src\main\java\mcp"
 
-gradlew build
+rem Compilation
 gradlew buildDll
 
-cd build
+xcopy /E /Y /I src\main\java mcp\src\minecraft
+cd mcp\runtime
+bin\python_mcp.exe recompile.py
+
+rem Package into a new jar
 mkdir mc-orig
 cd mc-orig
 copy /y C:\Users\gold1\AppData\Roaming\.minecraft\versions\1.10\1.10.jar ./
 bash -c "unzip -o 1.10.jar -d ."
 xcopy /E /Y assets ..\
+
+rem 
