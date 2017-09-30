@@ -1,4 +1,4 @@
-#!/bin/bash
+@echo off
 
 echo This is the build script for Jenkins to run. If you ware not Jenkins, you should not be running this script. It will not work and I will not support you.
 
