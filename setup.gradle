@@ -78,13 +78,32 @@ task downloadMcp(dependsOn: verifyEnvironment) {
     }
 }
 
-task decompileMcp(type: Exec, dependsOn: downloadMcp) {
-    if (OperatingSystem.current().isWindows()) {
-        commandLine "${project.projectDir}/mcp/runtime/bin/python/python_mcp", "${project.projectDir}/mcp/runtime/decompile.py", "--client", '-w', "C:\\Users\\gold1\\AppData\\Roaming\\.minecraft"
-        workingDir './mcp'
-    } else {
-        commandLine 'python2', '${project.projectDir}/mcp/runtime/decompile.py', '-m', "C:\\Users\\gold1\\AppData\\Roaming\\.minecraft"
-        workingDir 'mcp'
+task decompileMcp(dependsOn: downloadMcp) {
+    doLast {
+        new ByteArrayOutputStream().withStream { os ->
+            def result = exec {
+                if (OperatingSystem.current().isWindows()) {
+                    if(System.properties.contains("MCP_LOC")) {
+                        println 'Using MCP location ' + System.getProperty('MCP_LOC')
+                        commandLine "${project.projectDir}/mcp/runtime/bin/python/python_mcp", "${project.projectDir}/mcp/runtime/decompile.py", "--client", '-m', System.properties.getProperty("MCP_LOC")
+                    } else {
+                        commandLine "${project.projectDir}/mcp/runtime/bin/python/python_mcp", "${project.projectDir}/mcp/runtime/decompile.py", "--client"
+                    }
+                    workingDir './mcp'
+                } else {
+                    if(System.properties.contains("MCP_LOC")) {
+                        commandLine 'python2', '${project.projectDir}/mcp/runtime/decompile.py', '-m', System.properties.getProperty("MCP_LOC")
+                    } else {
+                        commandLine 'python2', '${project.projectDir}/mcp/runtime/decompile.py'
+                    }
+                    workingDir 'mcp'
+                }
+
+                standardOutput = os
+            }
+            def outputAsString = os.toString()
+            println "${outputAsString}"
+        }
     }
 }
 
