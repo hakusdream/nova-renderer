@@ -97,8 +97,6 @@ task decompileMcp(type: Exec, dependsOn: downloadMcp) {
             }
             workingDir 'mcp'
         }
-
-        standardOutput = os
     }
 }
 
