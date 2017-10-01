@@ -79,6 +79,7 @@ task downloadMcp(dependsOn: verifyEnvironment) {
 }
 
 task decompileMcp(type: Exec, dependsOn: downloadMcp) {
+    println "MCP_LOC: '$System.env.MCP_LOC'"
     if (OperatingSystem.current().isWindows()) {
         if("$System.env.MCP_LOC") {
             println 'Using MCP location ' + System.getProperty('MCP_LOC')
