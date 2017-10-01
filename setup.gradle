@@ -87,6 +87,7 @@ task decompileMcp(dependsOn: downloadMcp) {
                         println 'Using MCP location ' + System.getProperty('MCP_LOC')
                         commandLine "${project.projectDir}/mcp/runtime/bin/python/python_mcp", "${project.projectDir}/mcp/runtime/decompile.py", "--client", '-w', System.properties.getProperty("MCP_LOC")
                     } else {
+                        println 'There is no mcp here'
                         commandLine "${project.projectDir}/mcp/runtime/bin/python/python_mcp", "${project.projectDir}/mcp/runtime/decompile.py", "--client"
                     }
                     workingDir './mcp'
