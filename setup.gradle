@@ -80,9 +80,9 @@ task downloadMcp(dependsOn: verifyEnvironment) {
 
 task decompileMcp(type: Exec, dependsOn: downloadMcp) {
     if (OperatingSystem.current().isWindows()) {
-        if(System.getenv("MCP_LOC")) {
+        if("$System.env.MCP_LOC") {
             println 'Using MCP location ' + System.getProperty('MCP_LOC')
-            commandLine "${project.projectDir}/mcp/runtime/bin/python/python_mcp", "${project.projectDir}/mcp/runtime/decompile.py", "--client", '-w', System.getenv("MCP_LOC")
+            commandLine "${project.projectDir}/mcp/runtime/bin/python/python_mcp", "${project.projectDir}/mcp/runtime/decompile.py", "--client", '-w', "$System.env.MCP_LOC"
         } else {
             println 'There is no mcp here'
             commandLine "${project.projectDir}/mcp/runtime/bin/python/python_mcp", "${project.projectDir}/mcp/runtime/decompile.py", "--client"
