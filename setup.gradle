@@ -78,7 +78,7 @@ task downloadMcp(dependsOn: verifyEnvironment) {
     }
 }
 
-task decompileMcp(Exec, dependsOn: downloadMcp) {
+task decompileMcp(type: Exec, dependsOn: downloadMcp) {
     doLast {
         if (OperatingSystem.current().isWindows()) {
             if(System.properties.contains("MCP_LOC")) {
