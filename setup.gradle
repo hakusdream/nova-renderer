@@ -83,7 +83,7 @@ task decompileMcp(dependsOn: downloadMcp) {
         new ByteArrayOutputStream().withStream { os ->
             def result = exec {
                 if (OperatingSystem.current().isWindows()) {
-                    commandLine "${project.projectDir}/mcp/runtime/bin/python/python_mcp", "${project.projectDir}/mcp/runtime/decompile.py", "--client", '-w', 'C:\Users\gold1\AppData\Roaming\.minecraft'
+                    commandLine "${project.projectDir}/mcp/runtime/bin/python/python_mcp", "${project.projectDir}/mcp/runtime/decompile.py", "--client", '-w', 'C:\\Users\\gold1\\AppData\\Roaming\\.minecraft'
                     workingDir './mcp'
                 } else {
                     if(System.getProperties().contains("MCP_LOC")) {
