@@ -120,6 +120,10 @@ namespace nova {
         set_framebuffer_size({width,height});
     }
 
+    void glfw_gl_window::set_title(std::string title) {
+        glfwSetWindowTitle(window, title.c_str());
+    }
+
     bool glfw_gl_window::should_close() {
         return (bool) glfwWindowShouldClose(window);
     }

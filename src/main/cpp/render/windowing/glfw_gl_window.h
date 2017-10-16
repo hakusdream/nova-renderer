@@ -49,6 +49,8 @@ namespace nova {
 
         virtual void set_fullscreen(bool fullscreen);
 
+        void set_title(std::string title);
+
         virtual glm::vec2 get_size();
 
         virtual bool should_close();

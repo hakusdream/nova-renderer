@@ -3,6 +3,7 @@ package com.continuum.nova;
 import com.sun.jna.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.lwjgl.opengl.PixelFormat;
 
 import java.util.Arrays;
 import java.util.List;
@@ -289,7 +290,11 @@ public interface NovaNative extends Library {
 
     window_size get_window_size();
 
+    void set_window_title(String title);
+
     void set_fullscreen(int fullscreen);
+
+    void set_resizable(int resizable);
 
     boolean display_is_active();
 

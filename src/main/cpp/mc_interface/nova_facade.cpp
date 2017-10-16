@@ -93,6 +93,14 @@ NOVA_API void set_fullscreen(int fullscreen) {
     PROFILER::end("set_fullscreen");
 }
 
+NOVA_API void set_resizable(int resizable) {
+    // TODO: Figure out how to do this
+}
+
+NOVA_API void set_window_title(const char* title) {
+    NOVA_RENDERER->get_game_window().set_title(title);
+}
+
 NOVA_API bool should_close() {
     return NOVA_RENDERER->should_end();
 }
@@ -107,8 +115,7 @@ NOVA_API void add_gui_geometry(mc_gui_geometry * gui_geometry) {
     PROFILER::end("add_gui_geometry");
 }
 
-NOVA_API struct window_size get_window_size()
-{
+NOVA_API struct window_size get_window_size() {
     glm::vec2 size = NOVA_RENDERER->get_game_window().get_size();
     return {(int )size.y,(int)size.x};
 }

@@ -125,6 +125,15 @@ NOVA_API void clear_gui_buffers();
  * \param fullscreen true if 1, false otherwise
  */
 NOVA_API void set_fullscreen(int fullscreen);
+
+/*!
+ * \brief Sets whether or not the window is resizable
+ * \param resiszable True if 1, false otherwise
+ */
+NOVA_API void set_resizable(int resiszable);
+
+NOVA_API void set_window_title(const char* title);
+
 /*!
  * \brief Sets a string setting to a specified value
  *
