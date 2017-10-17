@@ -172,4 +172,8 @@ namespace nova {
     void glfw_gl_window::set_mouse_grabbed(bool grabbed) {
         glfwSetInputMode(window, GLFW_CURSOR, grabbed ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
     }
+
+    bool glfw_gl_window::is_created() {
+        return window != nullptr;
+    }
 }

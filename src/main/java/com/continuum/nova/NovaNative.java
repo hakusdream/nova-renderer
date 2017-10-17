@@ -296,6 +296,8 @@ public interface NovaNative extends Library {
 
     void set_resizable(int resizable);
 
+    boolean window_is_created();
+
     boolean display_is_active();
 
     void set_string_setting(String setting, String value);

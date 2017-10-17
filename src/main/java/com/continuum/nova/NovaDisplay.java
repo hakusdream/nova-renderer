@@ -4,6 +4,8 @@ import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.PixelFormat;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -50,23 +52,51 @@ public class NovaDisplay {
         NovaNative.INSTANCE.set_fullscreen(fullscreen ? 1 : 0);
     }
 
-    public DisplayMode getDisplayMode() {}
+    public DisplayMode getDisplayMode() {
+        NovaNative.window_size windowSize = NovaNative.INSTANCE.get_window_size();
+        return new DisplayMode(windowSize.width, windowSize.height);
+    }
 
-    public void setDisplayMode(DisplayMode displayMode) {}
+    public void setDisplayMode(DisplayMode displayMode) {
+        // Intentionally ignored because Nova will handle its own display mode, thank you very much
+    }
 
-    public boolean isCreated() {}
+    public boolean isCreated() {
+        return NovaNative.INSTANCE.window_is_created();
+    }
 
-    public boolean isCloseRequested() {}
+    public boolean isCloseRequested() {
+        return NovaNative.INSTANCE.should_close();
+    }
 
-    public void sync(int framerateLimit) {}
+    public void sync(int framerateLimit) {
+        // TODO: This method will be implemented when framerate limiting is a feature of Nova. For now it's
+        // intentionally left blank
+    }
 
-    public void setIcon(ByteBuffer iconBytes) {}
+    public void setIcon(ByteBuffer iconBytes) {
+        // TODO: This method will be implemented when I (or someone else I guess) figures out how to set the icon of a
+        // GLFW window
+    }
 
-    public void destroy() {}
+    public void destroy() {
+        // Nove wil handle its own lifetime, thank you very much
+    }
 
-    public void setVsyncEnabled(boolean vsyncEnabled) {}
+    public void setVsyncEnabled(boolean vsyncEnabled) {
+        // We're going to have to implement this using Vulkan and setting the present mode of the swapchain
+    }
 
-    public List<DisplayMode> getAvailableDisplayModes() {}
+    public List<DisplayMode> getAvailableDisplayModes() {
+        // Look I don't even know. Do I have to return anything? Nova will handle its own display mode bollocks so I
+        // guess I'll just return the bare minimum for Minecraft to not crash
+        return Collections.singletonList(getDisplayMode());
+    }
 
-    public DisplayMode getDesktopDisplayMode() {}
+    public DisplayMode getDesktopDisplayMode() {
+        // The official docs for this method say "Returns the desktop display mode". Like, wow, really? A method called
+        // getDesktopDisplayMode returns the desktop display mode? that definitely wasn't completely obvious from the
+        // method name
+        return getDisplayMode();
+    }
 }

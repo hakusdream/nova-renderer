@@ -105,6 +105,10 @@ NOVA_API bool should_close() {
     return NOVA_RENDERER->should_end();
 }
 
+NOVA_API bool window_is_created() {
+    return NOVA_RENDERER->get_game_window().is_created();
+}
+
 NOVA_API bool display_is_active() {
     return NOVA_RENDERER->get_game_window().is_active();
 }

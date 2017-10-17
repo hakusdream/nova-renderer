@@ -97,6 +97,8 @@ NOVA_API void execute_frame();
  */
 NOVA_API bool should_close();
 
+NOVA_API bool window_is_created();
+
 /*!
  * \brief Checks if the window has focus
  *

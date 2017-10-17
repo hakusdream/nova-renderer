@@ -57,7 +57,7 @@ include_directories(SYSTEM
         "${3RD_PARTY_DIR}/renderdocapi"
         )
 
-set(COMMON_LINK_LIBS ${CMAKE_DL_LIBS} glfw ${OPENGL_LIBRARIES} ${JNI_LIBRARIES})
+set(COMMON_LINK_LIBS ${CMAKE_DL_LIBS} glfw ${GLFW_LIBRARIES} ${OPENGL_LIBRARIES} ${JNI_LIBRARIES})
 
 # Setup the nova-core library.
 set(NOVA_HEADERS

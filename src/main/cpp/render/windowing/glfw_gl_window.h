@@ -53,11 +53,13 @@ namespace nova {
 
         virtual glm::vec2 get_size();
 
+        bool is_created();
+
         virtual bool should_close();
 
-        bool is_active();
-
         void set_mouse_grabbed(bool grabbed);
+
+        bool is_active();
 
         /**
          * iconfig_change_listener methods
@@ -71,7 +73,7 @@ namespace nova {
 
     private:
         static bool active;
-        GLFWwindow *window;
+        GLFWwindow *window = nullptr;
         glm::ivec2 window_dimensions;
         std::unique_ptr<RenderDocManager> renderdoc_manager;
         struct window_parameters windowed_window_parameters;
