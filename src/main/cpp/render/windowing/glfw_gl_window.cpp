@@ -176,4 +176,8 @@ namespace nova {
     bool glfw_gl_window::is_created() {
         return window != nullptr;
     }
+
+    void glfw_gl_window::make_context_current() {
+        glfwMakeContextCurrent(window);
+    }
 }

@@ -307,4 +307,6 @@ public interface NovaNative extends Library {
     void set_player_camera_transform(double x, double y, double z, float yaw, float pitch);
 
     String get_shaders_and_filters();
+
+    void make_context_current();
 }

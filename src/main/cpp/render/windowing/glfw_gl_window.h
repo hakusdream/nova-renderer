@@ -61,6 +61,10 @@ namespace nova {
 
         bool is_active();
 
+        void make_context_current();
+        
+        void release_context();
+        
         /**
          * iconfig_change_listener methods
          */

@@ -216,3 +216,7 @@ NOVA_API char* get_shaders_and_filters() {
     PROFILER::end("set_shaders_and_filters");
     return filters;
 }
+
+NOVA_API void make_context_current() {
+    NOVA_RENDERER->get_game_window().make_context_current();
+}

@@ -186,6 +186,8 @@ NOVA_API int get_num_loaded_shaders();
 
 NOVA_API char* get_shaders_and_filters();
 
+NOVA_API void make_context_current();
+
 };  // End extern C
     // I don't like doing this, but I just saw this closing curly brace and freaked out a little bit.
     // Random closing braces are not okay.
