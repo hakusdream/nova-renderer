@@ -47,10 +47,13 @@ public class ChunkBuilder {
         blockRendererDispatcher =  Minecraft.getMinecraft().getBlockRenderDispatcher();
         Map<String, List<BlockPos>> blocksForFilter = new HashMap<>();
 
+        BlockPos.MutableBlockPos filterPos = new BlockPos.MutableBlockPos();
+
         for(int x = range.min.x; x <= range.max.x; x++) {
             for(int y = range.min.y; y < range.max.y; y++) {
                 for(int z = range.min.z; z <= range.max.z; z++) {
-                    filterBlockAtPos(blocksForFilter, new BlockPos(x, y, z));
+                    filterPos.set(x, y, z);
+                    filterBlockAtPos(blocksForFilter, filterPos);
                 }
             }
         }
