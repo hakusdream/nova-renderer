@@ -294,7 +294,7 @@ namespace nova {
                SrcColor,
                DstColor,
                OneMinusSrcColor,
-               OneMinusSrcAlpha,
+               OneMinusDstColor,
                SrcAlpha,
                DstAlpha,
                OneMinusSrcAlpha,

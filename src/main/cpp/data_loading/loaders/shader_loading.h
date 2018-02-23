@@ -13,8 +13,17 @@
 #include <unordered_map>
 
 #include "shader_source_structs.h"
+#include "pass.h"
 
 namespace nova {
+    /*!
+     * \brief Loads all the passes that are present in the shaderpack with the given zip file name
+     *
+     * \param shaderpack_name The name of the shaderpack file to load things from
+     * \return A map from pass name to pass of all the passes found in that zip
+     */
+    std::unordered_map<std::string, pass> load_passes_from_zip(const std::string& shaderpack_name);
+
     /*!
      * \brief Loads the source file of all the shaders with the provided names
      *
@@ -26,6 +35,22 @@ namespace nova {
      * \return A map from shader name to shader source
      */
     shaderpack load_sources_from_zip_file(const std::string &shaderpack_name, const std::vector<std::string> &shader_names);
+
+    /*!
+     * \brief Loads all the passes that are present in the shaderpack with the given folder name
+     *
+     * \param shaderpack_name The name of the shaderpack folder to load things from
+     * \return A map from pass name to pass of all the passes found in that folder
+     */
+    std::unordered_map<std::string, pass> load_passes_from_folder(const std::string& shaderpack_name);
+
+    /*!
+     * \brief Gets a list of all the files in the given folder
+     *
+     * \param shaderpack_name The name of the shaderpack to get the names of the shaders in
+     * \return The names of all the shaders in
+     */
+    std::vector<std::string> get_shader_names_in_folder(const std::string& shaderpack_name);
 
     /*!
      * \brief Loads the source file of all the shaders with the provided names

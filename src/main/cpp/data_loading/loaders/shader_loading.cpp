@@ -5,6 +5,7 @@
  * \date 03-Sep-16.
  */
 
+#include <experimental/filesystem>
 #include <easylogging++.h>
 
 #include "loaders.h"
@@ -12,6 +13,8 @@
 #include "loader_utils.h"
 #include "../../render/objects/shaders/shaderpack.h"
 #include "../../utils/utils.h"
+
+//using fs = std::experimental::filesystem;
 
 namespace nova {
     shaderpack load_shaderpack(const std::string &shaderpack_name) {
@@ -24,18 +27,37 @@ namespace nova {
         //          - If at least one of the pass filenames matches one of the filenames of the default Optifine
         //              passes, load the Optifine passes as the default passes
         //          - If all filenames are unique, there are no default passes because the passes
+        //  - If there are no passes, check the shader names
+        //      - If all the shader names match Bedrock shader names, load the Bedrock passes as the default passes
+        //      - If all the shader names match Optifine shader names, load the Optifine passes as the default passes
+        //      - If some of the shader names match Bedrock shader names, load the Bedrock passes as the default passes
+        //          and print a warning (they might be including the files in their other files)
+        //      - If some of the shader names match Bedrock shader names, load the Optifine passes as the default passes
+        //          and print a warning (they might be including the files in their other files)
+        //      - If none of the shader names match known shader names, and there's no passes, thenw e don't know how to
+        //          handle this. Print an error, pop up an error on screen about "this shaderpack can't be loaded" and
+        //          make the user chose something else
 
-        LOG(DEBUG) << "Loading shaderpack " << shaderpack_name;
-        auto shader_sources = std::unordered_map<std::string, shader_definition>{};
-
+        LOG(INFO) << "Loading shaderpack " << shaderpack_name;
 
         if(is_zip_file(shaderpack_name)) {
             LOG(TRACE) << "Loading shaderpack " << shaderpack_name << " from a zip file";
-            return load_sources_from_zip_file(shaderpack_name, shader_names);
+
+            return load_sources_from_zip_file(shaderpack_name, {});
 
         } else {
             LOG(TRACE) << "Loading shaderpack " << shaderpack_name << " from a regular folder";
-            return load_sources_from_folder(shaderpack_name, shader_names);
+
+            auto shaderpack_directory = std::experimental::filesystem::path("shaderpacks/" + shaderpack_name);
+
+            auto passes = load_passes_from_folder(shaderpack_name);
+            if(passes.empty()) {
+                LOG(WARNING) << "No passes defines by shaderpack " << shaderpack_name << ". Attempting to guess the intended shaderpack format";
+
+                auto files = get_shader_names_in_folder(shaderpack_name);
+            }
+
+            return load_sources_from_folder(shaderpack_name, {});
         }
     }
 
@@ -84,8 +106,8 @@ namespace nova {
                 // All shaderpacks are in the shaderpacks folder
                 auto shader_path = "shaderpacks/" + shaderpack_name + "/shaders/" + shader.name;
 
-                shader.vertex_source = load_shader_file(shader_path, vertex_extensions);
-                shader.fragment_source = load_shader_file(shader_path, fragment_extensions);
+                shader.vertex_source = load_shader_file(shader_path, {});
+                shader.fragment_source = load_shader_file(shader_path, {});
 
                 sources.push_back(shader);
             } catch(std::exception& e) {

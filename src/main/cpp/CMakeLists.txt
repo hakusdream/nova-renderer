@@ -16,14 +16,14 @@ endfunction()
 
 # Initialize cmake options
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CONFIGURATION_TYPES Debug) # This seems to be needed to actually change
-
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 # Setup 3rd party dependencies.
 set(3RD_PARTY_DIR ${CMAKE_CURRENT_LIST_DIR}/3rdparty)
@@ -57,7 +57,7 @@ include_directories(SYSTEM
         "${3RD_PARTY_DIR}/renderdocapi"
         )
 
-set(COMMON_LINK_LIBS ${CMAKE_DL_LIBS} glfw ${OPENGL_LIBRARIES} ${JNI_LIBRARIES})
+set(COMMON_LINK_LIBS ${CMAKE_DL_LIBS} glfw ${OPENGL_LIBRARIES} ${JNI_LIBRARIES} stdc++fs)
 
 # Setup the nova-core library.
 set(NOVA_HEADERS
@@ -104,6 +104,10 @@ set(NOVA_HEADERS
         mc_interface/nova_jni.h
         render/objects/render_object.h
         utils/profiler.h
+
+        render/objects/context/gl_render_context.h
+        utils/stb_image_write.h
+        data_loading/loaders/pass.h
         )
 
 set(NOVA_SOURCE
@@ -143,21 +147,35 @@ set(NOVA_SOURCE
         data_loading/loaders/shader_source_structs.cpp
         data_loading/direct_buffers.cpp
         render/objects/render_object.cpp
-        utils/profiler.cpp)
+        utils/profiler.cpp
+        data_loading/loaders/pass.cpp
+        render/objects/context/gl_render_context.cpp )
 
 if (WIN32)
-    set(NOVA_SOURCE ${NOVA_SOURCE} ${NOVA_HEADERS} 3rdparty/renderdocapi/RenderDocManager.cpp utils/stb_image_write.h data_loading/loaders/pass.cpp data_loading/loaders/pass.h render/objects/context/gl_render_context.cpp render/objects/context/gl_render_context.h)
+    set(NOVA_SOURCE ${NOVA_SOURCE} ${NOVA_HEADERS} 3rdparty/renderdocapi/RenderDocManager.cpp )
 endif (WIN32)
 
 if (UNIX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DELPP_STACKTRACE_ON_CRASH -g")
 endif (UNIX)
 
+if(MSVC)
+    # Force to always compile with W4
+    if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
+        string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    else()
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+    endif()
+elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
+    # Update if necessary
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-long-long -pedantic")
+endif()
+
 # For now just put everthing in a single nova source group
 # because there are several sub groups that would be extremely small
 source_group("nova" FILES ${NOVA_HEADERS} ${NOVA_NO_COMPILE} ${NOVA_SOURCE})
 
-add_library(nova-renderer-obj OBJECT ${NOVA_SOURCE} ${GLAD_SOURCE} ${MINIZ_SOURCE})
+add_library(nova-renderer-obj OBJECT ${NOVA_SOURCE})
 set_target_properties(nova-renderer-obj PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
 target_compile_definitions(nova-renderer-obj PRIVATE DLL_EXPORT ELPP_THREAD_SAFE)
@@ -201,27 +219,3 @@ add_custom_command(TARGET nova-renderer
                    COMMAND cp -f "${CMAKE_CURRENT_LIST_DIR}/libnova-renderer.so" "${CMAKE_CURRENT_LIST_DIR}/../../../jars/versions/1.10/1.10-natives")
 endif (UNIX)
 
-# Setup the nova-test executable
-#set(TEST_SOURCE_FILES
-#        3rdparty/glad/src/glad.c
-
-#        test/main.cpp
-
-#        test/model/loaders/shader_loading_test.cpp
-#        test/render/objects/textures/texture_manager_test.cpp
-#        test/render/objects/shaders/gl_shader_program_test.cpp
-#        test/geometry_cache/mesh_store_test.cpp
-#        test/test_utils.cpp
-#        test/test_utils.h)
-
-#source_group("test" FILES ${TEST_SOURCE_FILES})
-
-#add_executable(nova-test ${TEST_SOURCE_FILES} ${NOVA_SOURCE})
-#target_compile_definitions(nova-test PUBLIC STATIC_LINKAGE)
-#target_link_libraries(nova-test gtest ${COMMON_LINK_LIBS})
-#set_target_properties(nova-test PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
-
-# Needed for a similar reason as the libary
-#if (MSVC)
-#    nova_set_all_target_outputs(nova-test "run")
-#endif()
