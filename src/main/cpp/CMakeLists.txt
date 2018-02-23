@@ -149,10 +149,10 @@ set(NOVA_SOURCE
         render/objects/render_object.cpp
         utils/profiler.cpp
         data_loading/loaders/pass.cpp
-        render/objects/context/gl_render_context.cpp )
+        render/objects/context/gl_render_context.cpp data_loading/loaders/shader_file_loading.cpp)
 
 if (WIN32)
-    set(NOVA_SOURCE ${NOVA_SOURCE} ${NOVA_HEADERS} 3rdparty/renderdocapi/RenderDocManager.cpp )
+    set(NOVA_SOURCE ${NOVA_SOURCE} ${NOVA_HEADERS} 3rdparty/renderdocapi/RenderDocManager.cpp data_loading/loaders/shader_zip_loading.cpp)
 endif (WIN32)
 
 if (UNIX)

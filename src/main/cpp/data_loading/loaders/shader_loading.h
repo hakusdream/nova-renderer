@@ -8,12 +8,16 @@
 #ifndef RENDERER_SHADER_LOADING_H_H
 #define RENDERER_SHADER_LOADING_H_H
 
+#include <experimental/filesystem>
 #include <string>
 #include <vector>
 #include <unordered_map>
 
 #include "shader_source_structs.h"
 #include "pass.h"
+#include "../../render/objects/shaders/shaderpack.h"
+
+namespace fs = std::experimental::filesystem;
 
 namespace nova {
     /*!
@@ -39,10 +43,12 @@ namespace nova {
     /*!
      * \brief Loads all the passes that are present in the shaderpack with the given folder name
      *
-     * \param shaderpack_name The name of the shaderpack folder to load things from
+     * \param shaderpack_path The name of the shaderpack folder to load things from
      * \return A map from pass name to pass of all the passes found in that folder
      */
-    std::unordered_map<std::string, pass> load_passes_from_folder(const std::string& shaderpack_name);
+    std::unordered_map<std::string, pass> load_passes_from_folder(const fs::path& shaderpack_path);
+
+    std::unordered_map<std::string, pass> get_material_definitions(const nlohmann::json &shaders_json);
 
     /*!
      * \brief Gets a list of all the files in the given folder
@@ -50,7 +56,7 @@ namespace nova {
      * \param shaderpack_name The name of the shaderpack to get the names of the shaders in
      * \return The names of all the shaders in
      */
-    std::vector<std::string> get_shader_names_in_folder(const std::string& shaderpack_name);
+    std::vector<std::string> get_shader_names_in_folder(const fs::path& shaderpack_path);
 
     /*!
      * \brief Loads the source file of all the shaders with the provided names

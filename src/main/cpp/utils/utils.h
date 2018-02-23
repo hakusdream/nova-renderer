@@ -37,7 +37,7 @@ namespace nova {
     template <typename Cont, typename Func>
     void foreach(Cont container, Func thingToDo) {
         std::for_each(std::cbegin(container), std::cend(container), thingToDo);
-    };
+    }
 
     template<typename Out>
     void split(const std::string &s, char delim, Out result) {
@@ -56,7 +56,7 @@ namespace nova {
      */
     class resource_not_found : public std::exception {
     public:
-        resource_not_found(const std::string& msg);
+        resource_not_found(const std::string& resource_name);
         virtual const char * what() const noexcept;
     private:
         std::string message;

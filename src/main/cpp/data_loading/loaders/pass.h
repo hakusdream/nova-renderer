@@ -570,6 +570,8 @@ namespace nova {
          * \param pass_json The JSON that this pass will be created from
          */
         pass(const std::string& pass_name, const optional<std::string>& parent_pass_name, const nlohmann::json& pass_json);
+
+        pass() = default;
     };
 
     /*!

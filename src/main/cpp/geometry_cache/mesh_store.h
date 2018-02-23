@@ -85,6 +85,6 @@ namespace nova {
         void remove_render_objects(std::function<bool(render_object&)> fitler);
     };
 
-};
+}
 
 #endif //RENDERER_GEOMETRY_CACHE_H

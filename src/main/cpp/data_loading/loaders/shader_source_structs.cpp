@@ -8,11 +8,11 @@
 
 namespace nova {
     shader_definition::shader_definition(nlohmann::json& json)  {
-        name = json["name"];
+        name = json["name"].get<std::string>();
 
         LOG(DEBUG) << "Creating shader definition from json " << json;
 
-        filter_expression = json["filters"];
+        filter_expression = json["filters"].get<std::string>();
 
         if(json.find("fallback") != json.end()) {
             std::string fallback_name_str = json["fallback"];

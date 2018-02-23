@@ -1,20 +1,18 @@
 /*!
- * \brief Implements the functions in shader_loading.h
+ * \brief Implements fucntions for loading a shaderpack
+ *
+ * The functions here work for both zip and folder shaderpacks
  *
  * \author ddubois 
  * \date 03-Sep-16.
  */
 
-#include <experimental/filesystem>
 #include <easylogging++.h>
 
 #include "loaders.h"
 #include "shader_loading.h"
 #include "loader_utils.h"
-#include "../../render/objects/shaders/shaderpack.h"
 #include "../../utils/utils.h"
-
-//using fs = std::experimental::filesystem;
 
 namespace nova {
     shaderpack load_shaderpack(const std::string &shaderpack_name) {
@@ -48,9 +46,9 @@ namespace nova {
         } else {
             LOG(TRACE) << "Loading shaderpack " << shaderpack_name << " from a regular folder";
 
-            auto shaderpack_directory = std::experimental::filesystem::path("shaderpacks/" + shaderpack_name);
+            auto shaderpack_directory = fs::path("shaderpacks") / shaderpack_name;
 
-            auto passes = load_passes_from_folder(shaderpack_name);
+            auto passes = load_passes_from_folder(shaderpack_directory);
             if(passes.empty()) {
                 LOG(WARNING) << "No passes defines by shaderpack " << shaderpack_name << ". Attempting to guess the intended shaderpack format";
 
@@ -60,6 +58,151 @@ namespace nova {
             return load_sources_from_folder(shaderpack_name, {});
         }
     }
+
+    template<typename Type>
+    void fill_in_material_state_field(const std::string& our_name, std::unordered_map<std::string, pass>& all_materials, std::function<optional<Type>&(pass&)> get_field_from_material) {
+        auto &us = all_materials[our_name];
+        auto &cur_state = us;
+        bool value_found = (bool) get_field_from_material(us);
+
+        while(!value_found) {
+            const auto &parent_name = cur_state.parent_name;
+            if(parent_name) {
+                cur_state = all_materials[parent_name.value()];
+                auto field_value = get_field_from_material(cur_state);
+                if(field_value) {
+                    get_field_from_material(us) = field_value.value();
+                    value_found = true;
+                }
+
+            } else {
+                break;
+            }
+        }
+    }
+
+    template<typename Type>
+    void fill_field(const std::string& name, std::unordered_map<std::string, pass> materials, optional<Type> pass::* ptr) {
+        fill_in_material_state_field<Type>(name, materials, [ptr](pass& s) -> optional<Type>&{ return s.*ptr; });
+    }
+
+    std::unordered_map<std::string, pass> get_material_definitions(const nlohmann::json &shaders_json) {
+        std::unordered_map<std::string, pass> definition_map;
+        for(auto itr = shaders_json.begin(); itr != shaders_json.end(); ++itr) {
+            auto material_state_name = itr.key();
+            auto json_node = itr.value();
+            optional<std::string> parent_state_name = optional<std::string>{};
+
+            int colon_pos = material_state_name.find(':');
+            if(colon_pos != std::string::npos) {
+                auto parent_name = material_state_name.substr(colon_pos + 1);
+                parent_state_name = parent_name;
+                material_state_name = material_state_name.substr(0, colon_pos);
+            }
+
+            auto material = pass(material_state_name, parent_state_name, json_node);
+            definition_map[material_state_name] = material;
+            LOG(TRACE) << "Inserted a material named " << material_state_name;
+        }
+
+        // I don't really know the O(n) for this thing. It's at least O(n) and probs O(nlogn) but someone mathy can
+        // figure it out
+        for(const auto& item : definition_map) {
+            auto& cur_state = item.second;
+
+            if(!cur_state.parent_name) {
+                // No parent? I guess we get what we have then
+                continue;
+            }
+
+            fill_field(item.first, definition_map, &pass::defines);
+            fill_field(item.first, definition_map, &pass::states);
+            fill_field(item.first, definition_map, &pass::vertex_shader);
+            fill_field(item.first, definition_map, &pass::fragment_shader);
+            fill_field(item.first, definition_map, &pass::geometry_shader);
+            fill_field(item.first, definition_map, &pass::tessellation_evaluation_shader);
+            fill_field(item.first, definition_map, &pass::tessellation_control_shader);
+            fill_field(item.first, definition_map, &pass::vertex_fields);
+            fill_field(item.first, definition_map, &pass::front_face);
+            fill_field(item.first, definition_map, &pass::back_face);
+            fill_field(item.first, definition_map, &pass::sampler_states);
+            fill_field(item.first, definition_map, &pass::textures);
+            fill_field(item.first, definition_map, &pass::filters);
+            fill_field(item.first, definition_map, &pass::fallback);
+            fill_field(item.first, definition_map, &pass::depth_bias);
+            fill_field(item.first, definition_map, &pass::slope_scaled_depth_bias);
+            fill_field(item.first, definition_map, &pass::stencil_ref);
+            fill_field(item.first, definition_map, &pass::stencil_read_mask);
+            fill_field(item.first, definition_map, &pass::stencil_write_mask);
+            fill_field(item.first, definition_map, &pass::msaa_support);
+            fill_field(item.first, definition_map, &pass::primitive_mode);
+            fill_field(item.first, definition_map, &pass::source_blend_factor);
+            fill_field(item.first, definition_map, &pass::destination_blend_factor);
+            fill_field(item.first, definition_map, &pass::alpha_src);
+            fill_field(item.first, definition_map, &pass::alpha_dst);
+            fill_field(item.first, definition_map, &pass::depth_func);
+            fill_field(item.first, definition_map, &pass::render_queue);
+            fill_field(item.first, definition_map, &pass::dependencies);
+            fill_field(item.first, definition_map, &pass::texture_inputs);
+            fill_field(item.first, definition_map, &pass::texture_outputs);
+
+            LOG(TRACE) << "Filed in all fields on material " << cur_state.name;
+        }
+
+        return definition_map;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     std::vector<shader_definition> get_shader_definitions(nlohmann::json &shaders_json) {
         // Check if the top-level element is an array or an object. If it's
@@ -79,45 +222,6 @@ namespace nova {
         }
 
         return definitions;
-    }
-
-    shaderpack load_sources_from_folder(const std::string &shaderpack_name, const std::vector<std::string> &shader_names) {
-        std::vector<shader_definition> sources;
-
-        // First, load in the shaders.json file so we can see what we're
-        // dealing with
-        std::ifstream shaders_json_file("shaderpacks/" + shaderpack_name + "/shaders.json");
-        // TODO: Load a default shaders.json file, store it somewhere
-        // accessable, and load it if there isn't a shaders.json in the
-        // shaderpack
-        nlohmann::json shaders_json;
-        if(shaders_json_file.is_open()) {
-            shaders_json_file >> shaders_json;
-
-        } else {
-            shaders_json = get_default_shaders_json();
-        }
-
-        // Figure out all the shader files that we need to load
-        auto shaders = get_shader_definitions(shaders_json);
-
-        for(auto &shader : shaders) {
-            try {
-                // All shaderpacks are in the shaderpacks folder
-                auto shader_path = "shaderpacks/" + shaderpack_name + "/shaders/" + shader.name;
-
-                shader.vertex_source = load_shader_file(shader_path, {});
-                shader.fragment_source = load_shader_file(shader_path, {});
-
-                sources.push_back(shader);
-            } catch(std::exception& e) {
-                LOG(ERROR) << "Could not load shader " << shader.name << ". Reason: " << e.what();
-            }
-        }
-
-        warn_for_missing_fallbacks(sources);
-
-        return shaderpack(shaderpack_name, shaders_json, sources);
     }
 
     void warn_for_missing_fallbacks(std::vector<shader_definition> sources) {

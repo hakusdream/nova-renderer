@@ -23,9 +23,7 @@ void initialize_logging() {
 }
 
 namespace nova {
-    resource_not_found::resource_not_found(const std::string &msg) {
-        message = "Could not find resource " + msg;
-    }
+    resource_not_found::resource_not_found(const std::string &resource_name) : message("Could not find resource " + resource_name) {}
 
     const char * resource_not_found::what() const noexcept {
         return message.c_str();
@@ -36,10 +34,20 @@ namespace nova {
         std::string accum;
 
         while(getline(stream, buf)) {
+            auto slash_pos = buf.find("//");
+            if(slash_pos != std::string::npos) {
+                LOG(DEBUG) << "Removing comment after character " << slash_pos << " in " << buf;
+                buf = buf.substr(0, slash_pos);
+            }
             accum += buf;
         }
 
-        return nlohmann::json::parse(accum.c_str());
+        try {
+            return nlohmann::json::parse(accum.c_str());
+        } catch(std::exception& e) {
+            LOG(ERROR) << "Could not parse JSON " << e.what();
+            return {};
+        }
     }
 
     std::vector<std::string> split(const std::string &s, char delim) {
