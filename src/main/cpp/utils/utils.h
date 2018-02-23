@@ -16,8 +16,11 @@
 #include <json.hpp>
 #include <fstream>
 
+#include <optional.hpp>
 #include <easylogging++.h>
 #include <glm/glm.hpp>
+
+using namespace std::experimental;
 
 /*!
  * \brief Initializes the logging system
@@ -130,6 +133,43 @@ namespace nova {
     std::string print_color(unsigned int color);
 
     std::string print_array(int data[], int num_elements);
+
+    /*!
+    * \brief Checks if the given value is in the provided json
+    * \param key The key to look for
+    * \param json_obj The JSON object to look for the key in
+    * \param decoder A function that deserializes the value
+    * \return An optional that wraps the
+    */
+    template <typename ValType>
+    optional<ValType> get_json_value(const nlohmann::json& json_obj, const std::string key, std::function<ValType(const nlohmann::json&)> decoder) {
+        const auto& itr = json_obj.find(key);
+        if(itr != json_obj.end()) {
+            auto& json_node = json_obj.at(key);
+            ValType val = decoder(json_node);
+            return optional<ValType>{std::move(val)};
+        }
+
+        return optional<ValType>{};
+    }
+
+    /*!
+     * \brief Checks if the given value is in the provided json
+     * \param key The key to look for
+     * \param json_obj The JSON object to look for the key in
+     * \param decoder A function that deserializes the value
+     * \return An optional that wraps the
+     */
+    template <typename ValType>
+    optional<ValType> get_json_value(const nlohmann::json& json_obj, const std::string key) {
+        const auto& itr = json_obj.find(key);
+        if(itr != json_obj.end()) {
+            auto& json_node = json_obj.at(key);
+            return optional<ValType>(json_node.get<ValType>());
+        }
+
+        return optional<ValType>{};
+    }
 }
 
 #endif //RENDERER_UTILS_H

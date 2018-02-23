@@ -14,30 +14,21 @@
 #include "../../utils/utils.h"
 
 namespace nova {
-    /*!
-     * \brief Holds the name of all the shaders to load
-     *
-     * As we add more shaders, we should add their names to this vector
-     */
-    std::vector<std::string> shader_names = {
-            "gui"
-    };
-
-    std::vector<std::string> fragment_extensions = {
-            ".fsh",
-            ".frag",
-            ".frag.spv"
-    };
-
-    std::vector<std::string> vertex_extensions = {
-            ".vsh",
-            ".vert",
-            ".vert.spv"
-    };
-
     shaderpack load_shaderpack(const std::string &shaderpack_name) {
+        // Load the passes
+        //  - Check if there's passes in the shaderpack
+        //  - If so, identify if there are a complete set of passes
+        //      - If there are not, fill in missing passes from the defaults
+        //          - If at least one of the pass filenames matches one of the filenames of the default Bedrock
+        //              materials, load the Bedrock passes as the default passes
+        //          - If at least one of the pass filenames matches one of the filenames of the default Optifine
+        //              passes, load the Optifine passes as the default passes
+        //          - If all filenames are unique, there are no default passes because the passes
+
         LOG(DEBUG) << "Loading shaderpack " << shaderpack_name;
         auto shader_sources = std::unordered_map<std::string, shader_definition>{};
+
+
         if(is_zip_file(shaderpack_name)) {
             LOG(TRACE) << "Loading shaderpack " << shaderpack_name << " from a zip file";
             return load_sources_from_zip_file(shaderpack_name, shader_names);
