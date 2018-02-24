@@ -134,7 +134,6 @@ set(NOVA_SOURCE
         data_loading/loaders/shader_loading.cpp
         data_loading/loaders/loader_utils.cpp
 
-        render/objects/shaders/shaderpack.cpp
         geometry_cache/mesh_store.cpp
         data_loading/physics/aabb.cpp
         geometry_cache/mesh_definition.cpp

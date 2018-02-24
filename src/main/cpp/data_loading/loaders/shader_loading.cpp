@@ -67,7 +67,7 @@ namespace nova {
     bool contains_bedrock_files(std::vector<filesystem::path> &files);
     bool contains_optifine_files(std::vector<filesystem::path> &files);
 
-    shaderpack load_shaderpack(const std::string &shaderpack_name) {
+    std::unordered_map<std::string, pass> load_shaderpack(const std::string &shaderpack_name) {
         // Load the passes
         //  - Check if there's passes in the shaderpack
         //  - If so, identify if there are a complete set of passes
@@ -93,7 +93,8 @@ namespace nova {
         if(is_zip_file(shaderpack_name)) {
             LOG(TRACE) << "Loading shaderpack " << shaderpack_name << " from a zip file";
 
-            return load_sources_from_zip_file(shaderpack_name, {});
+            auto sources = load_sources_from_zip_file(shaderpack_name, {});
+            return {};
 
         } else {
             LOG(TRACE) << "Loading shaderpack " << shaderpack_name << " from a regular folder";
@@ -108,10 +109,10 @@ namespace nova {
                 auto files = get_shader_names_in_folder(shaderpack_directory / "shaders");
 
                 if(contains_bedrock_files(files)) {
-                    passes = default_bedrock_passes();
+                    passes = parse_passes_from_json(get_default_bedrock_passes());
 
                 } else if(contains_optifine_files(files)) {
-                    passes = default_optifine_passes();
+                    passes = parse_passes_from_json(get_default_optifine_passes());
 
                 } else {
                     LOG(FATAL) << "Cannot work with the format of this shaderpack. Please chose another one and try again";
@@ -122,8 +123,18 @@ namespace nova {
                 // Right now I'm not dealing with that
             }
 
-            LOG(INFO) << "Loading sources";
-            return load_sources_from_folder(shaderpack_directory, passes);
+            LOG(INFO) << "Reading shaders from disk";
+            auto sources = load_sources_from_folder(shaderpack_directory, passes);
+
+            LOG(INFO) << "Compiling shaders";
+            for(auto& named_pass : passes) {
+                // TODO: Multithreaded shader compilation
+                named_pass.second.program = std::make_shared<gl_shader_program>(sources[named_pass.first]);
+
+                glObjectLabel(GL_PROGRAM, named_pass.second.program->gl_name, named_pass.first.size(), named_pass.first.c_str());
+            }
+
+            return passes;
         }
     }
 
@@ -298,12 +309,12 @@ namespace nova {
         return include_line.substr(quote_pos + 1, include_line.size() - quote_pos - 2);
     }
 
-    shaderpack load_sources_from_zip_file(const std::string &shaderpack_name, const std::vector<std::string> &shader_names) {
+    std::unordered_map<std::string, shader_definition> load_sources_from_zip_file(const std::string &shaderpack_name, const std::vector<std::string> &shader_names) {
         LOG(FATAL) << "Cannot load zipped shaderpack " << shaderpack_name;
         throw std::runtime_error("Zipped shaderpacks not yet supported");
     }
 
-    nlohmann::json& default_bedrock_passes() {
+    nlohmann::json& get_default_bedrock_passes() {
         static nlohmann::json default_bedrock_passes;
 
         if(default_bedrock_passes.empty()) {
@@ -318,7 +329,7 @@ namespace nova {
         return default_bedrock_passes;
     }
 
-    nlohmann::json& default_optifine_passes() {
+    nlohmann::json& get_default_optifine_passes() {
         static nlohmann::json default_optifine_passes;
 
         if(default_optifine_passes.empty()) {

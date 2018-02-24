@@ -15,7 +15,6 @@
 
 #include "shader_source_structs.h"
 #include "../../render/objects/pass.h"
-#include "../../render/objects/shaders/shaderpack.h"
 
 namespace fs = std::experimental::filesystem;
 
@@ -38,7 +37,7 @@ namespace nova {
      * \param shader_names The list of names of shaders to load
      * \return A map from shader name to shader source
      */
-    shaderpack load_sources_from_zip_file(const std::string &shaderpack_name, const std::vector<std::string> &shader_names);
+    std::unordered_map<std::string, shader_definition> load_sources_from_zip_file(const std::string &shaderpack_name, const std::vector<std::string> &shader_names);
 
     /*!
      * \brief Loads all the passes that are present in the shaderpack with the given folder name
@@ -89,14 +88,14 @@ namespace nova {
      *
      * \return The JSON for the default Bedrock material files
      */
-    nlohmann::json& default_bedrock_passes();
+    nlohmann::json& get_default_bedrock_passes();
 
     /*!
      * \brief Loads the JSON for the default Optifine passes
      *
      * \return The JSON for the default Optifine passes
      */
-    nlohmann::json& default_optifine_passes();
+    nlohmann::json& get_default_optifine_passes();
 }
 
 #endif //RENDERER_SHADER_LOADING_H_H

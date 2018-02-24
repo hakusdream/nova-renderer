@@ -87,8 +87,6 @@ namespace nova {
 
         camera& get_player_camera();
 
-        std::shared_ptr<shaderpack> get_shaders();
-
         // Overrides from iconfig_listener
 
         void on_config_change(nlohmann::json& new_config);
@@ -100,8 +98,6 @@ namespace nova {
 		static std::unique_ptr<settings> render_settings; 
 
         std::unique_ptr<glfw_gl_window> game_window;
-
-        std::shared_ptr<shaderpack> loaded_shaderpack;
 
         std::unique_ptr<texture_manager> textures;
 

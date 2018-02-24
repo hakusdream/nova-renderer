@@ -80,7 +80,7 @@ namespace nova {
      * \param included_file_name The name of the file to include
      * \return The path to the included file
      */
-    auto get_included_file_path(const fs::path &shader_path, const fs::path &included_file_name);
+    fs::path get_included_file_path(const fs::path &shader_path, const fs::path &included_file_name);
 
     std::unordered_map<std::string, pass> load_passes_from_folder(const fs::path &shaderpack_path) {
         auto materials_path = shaderpack_path / "materials";
@@ -153,15 +153,15 @@ namespace nova {
                 shader_lines.geometry_source = load_shader_file(shaderpack_name / pass_data.geometry_shader.value(), geometry_extensions);
             }
 
-            if(pass_data.tessellation_control_shader && !pass_data.tessellation_eval_shader) {
+            if(pass_data.tessellation_control_shader && !pass_data.tessellation_evaluation_shader) {
                 LOG(WARNING) << "You've set a tessellation control shader but not an evaluation shader. You need both for this pass to perform tessellation, so Nova will not perform tessellation for this pass";
 
-            } else if(pass_data.tessellation_eval_shader && !pass_data.tessellation_control_shader) {
+            } else if(pass_data.tessellation_evaluation_shader && !pass_data.tessellation_control_shader) {
                 LOG(WARNING) << "You've set a tessellation evaluation shader but not a control shader. You need both for this pass to perform tessellation, so Nova will not perform tessellation for this pass";
 
             } else {
-                shader_lines.tessellation_evaluation_source = load_shader_file(shaderpack_name / pass_data.tessellation_eval_shader.value(), tess_eval_extensions);
-                shader_lines.tessellation_control_source = load_shader_file(shaderpack_name / pass_data.tessellation_control_shader.value(), tess_control_extensions)
+                shader_lines.tessellation_evaluation_source = load_shader_file(shaderpack_name / pass_data.tessellation_evaluation_shader.value(), tess_eval_extensions);
+                shader_lines.tessellation_control_source = load_shader_file(shaderpack_name / pass_data.tessellation_control_shader.value(), tess_control_extensions);
             }
         }
 
@@ -170,10 +170,11 @@ namespace nova {
 
     std::vector<shader_line> load_shader_file(const fs::path &shader_path, const std::vector<std::string> &extensions) {
         for(auto &extension : extensions) {
-            auto full_shader_path = shader_path / extension;
+            auto full_shader_path = shader_path;
+            full_shader_path += extension;
             LOG(TRACE) << "Trying to load shader file " << full_shader_path;
 
-            std::ifstream stream(full_shader_path, std::ios::in);
+            std::ifstream stream(full_shader_path.string(), std::ios::in);
             if(stream.good()) {
                 LOG(INFO) << "Loading shader file " << full_shader_path;
                 return read_shader_stream(stream, full_shader_path);
@@ -182,7 +183,7 @@ namespace nova {
             }
         }
 
-        throw resource_not_found(shader_path);
+        throw resource_not_found(shader_path.string());
     }
 
     std::vector<shader_line> read_shader_stream(std::istream &stream, const fs::path &shader_path) {
@@ -212,7 +213,7 @@ namespace nova {
         try {
             return load_shader_file(file_to_include, {""});
         } catch(resource_not_found& e) {
-            throw std::runtime_error("Could not load included file " + file_to_include);
+            throw std::runtime_error("Could not load included file " + file_to_include.string());
         }
     }
 
@@ -233,7 +234,7 @@ namespace nova {
         }
     }
 
-    auto get_included_file_path(const fs::path &shader_path, const fs::path &included_file_name) {
+    fs::path get_included_file_path(const fs::path &shader_path, const fs::path &included_file_name) {
         if(included_file_name.is_absolute()) {
             // This is an absolute include and it should be relative to the root directory
             auto shaderpack_name = get_shaderpack_name(shader_path);
@@ -241,7 +242,7 @@ namespace nova {
 
         } else {
             // The include file is a relative include, this one's actually simpler
-            return shader_path.parent_path() + included_file_name;
+            return shader_path.parent_path() / included_file_name;
         }
     }
 }

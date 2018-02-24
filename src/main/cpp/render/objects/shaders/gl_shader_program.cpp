@@ -125,14 +125,6 @@ namespace nova {
         added_shaders.push_back(shader_name);
     }
 
-    std::string & gl_shader_program::get_filter() noexcept {
-        return filter;
-    }
-
-    std::string &gl_shader_program::get_name() noexcept {
-        return name;
-    }
-
     GLint gl_shader_program::get_uniform_location(const std::string uniform_name) {
         auto location_in_uniform_locations = uniform_locations.find(uniform_name);
         if(location_in_uniform_locations == uniform_locations.end()) {

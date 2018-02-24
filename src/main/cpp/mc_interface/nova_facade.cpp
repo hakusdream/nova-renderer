@@ -171,12 +171,12 @@ NOVA_API void set_mouse_grabbed(int grabbed) {
 }
 
 NOVA_API int get_num_loaded_shaders() {
-    return static_cast<int>(NOVA_RENDERER->get_shaders()->get_loaded_shaders().size());
+    return 0;
 }
 
 NOVA_API char* get_shaders_and_filters() {
     PROFILER::start("set_shaders_and_filters");
-    auto& shaders = NOVA_RENDERER->get_shaders()->get_loaded_shaders();
+    /*(auto& shaders = NOVA_RENDERER->get_shaders()->get_loaded_shaders();
 
     int num_chars = 0;
     for(auto& s : shaders) {
@@ -201,7 +201,7 @@ NOVA_API char* get_shaders_and_filters() {
         write_pos++;
     }
 
-    filters[num_chars - 1] = '\0';
+    filters[num_chars - 1] = '\0';*/
     PROFILER::end("set_shaders_and_filters");
-    return filters;
+    return "";
 }

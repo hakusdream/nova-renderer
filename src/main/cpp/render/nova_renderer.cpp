@@ -102,10 +102,6 @@ namespace nova {
         LOG(TRACE) << "Rendering gbuffer pass";
 
         // TODO: Get shaders with gbuffers prefix, draw transparents last, etc
-        auto& terrain_shader = loaded_shaderpack->get_shader("gbuffers_terrain");
-        render_shader(terrain_shader);
-        auto& water_shader = loaded_shaderpack->get_shader("gbuffers_water");
-        render_shader(water_shader);
     }
 
     void nova_renderer::render_composite_passes() {
@@ -121,23 +117,6 @@ namespace nova {
     void nova_renderer::render_gui() {
         LOG(TRACE) << "Rendering GUI";
         glClear(GL_DEPTH_BUFFER_BIT);
-
-        // Bind all the GUI data
-        auto &gui_shader = loaded_shaderpack->get_shader("gui");
-        gui_shader.bind();
-
-        upload_gui_model_matrix(gui_shader);
-
-        // Render GUI objects
-        std::vector<render_object>& gui_geometry = meshes->get_meshes_for_shader("gui");
-        for(const auto& geom : gui_geometry) {
-            if (!geom.color_texture.empty()) {
-                auto color_texture = textures->get_texture(geom.color_texture);
-                color_texture.bind(0);
-            }
-            geom.geometry->set_active();
-            geom.geometry->draw();
-        }
     }
 
     bool nova_renderer::should_end() {
@@ -237,7 +216,7 @@ namespace nova {
 		auto& shaderpack_name = new_config["loadedShaderpack"];
         LOG(INFO) << "Shaderpack in settings: " << shaderpack_name;
 
-        if(!loaded_shaderpack) {
+       /* if(!loaded_shaderpack) {
             LOG(DEBUG) << "There's currenty no shaderpack, so we're loading a new one";
             load_new_shaderpack(shaderpack_name);
             return;
@@ -247,7 +226,7 @@ namespace nova {
         if(shaderpack_in_settings_is_new) {
             LOG(DEBUG) << "Shaderpack " << shaderpack_name << " is about to replace shaderpack " << loaded_shaderpack->get_name();
             load_new_shaderpack(shaderpack_name);
-        }
+        }*/
 
         LOG(DEBUG) << "Finished dealing with possible new shaderpack";
     }
@@ -277,7 +256,7 @@ namespace nova {
     }
 
     void nova_renderer::load_new_shaderpack(const std::string &new_shaderpack_name) {
-		LOG(INFO) << "Loading a new shaderpack";
+		/*LOG(INFO) << "Loading a new shaderpack";
         LOG(INFO) << "Name of shaderpack " << new_shaderpack_name;
         loaded_shaderpack = std::make_shared<shaderpack>(load_shaderpack(new_shaderpack_name));
         LOG(DEBUG) << "Shaderpack loaded, wiring everything together";
@@ -286,7 +265,7 @@ namespace nova {
         link_up_uniform_buffers(loaded_shaderpack->get_loaded_shaders(), *ubo_manager);
         LOG(DEBUG) << "Linked up UBOs";
 
-        create_framebuffers_from_shaderpack();
+        create_framebuffers_from_shaderpack();*/
     }
 
     void nova_renderer::create_framebuffers_from_shaderpack() {
@@ -322,7 +301,7 @@ namespace nova {
     }
 
     void nova_renderer::render_shader(gl_shader_program &shader) {
-        LOG(TRACE) << "Rendering everything for shader " << shader.get_name();
+        /*LOG(TRACE) << "Rendering everything for shader " << shader.get_name();
         profiler::start(shader.get_name());
         shader.bind();
 
@@ -366,7 +345,7 @@ namespace nova {
         }
         profiler::end("process_all");
 
-        profiler::end(shader.get_name());
+        profiler::end(shader.get_name());*/
     }
 
     inline void nova_renderer::upload_model_matrix(render_object &geom, gl_shader_program &program) const {
@@ -407,10 +386,6 @@ namespace nova {
 
     camera &nova_renderer::get_player_camera() {
         return player_camera;
-    }
-
-    std::shared_ptr<shaderpack> nova_renderer::get_shaders() {
-        return loaded_shaderpack;
     }
 
     void link_up_uniform_buffers(std::unordered_map<std::string, gl_shader_program> &shaders, uniform_buffer_store &ubos) {

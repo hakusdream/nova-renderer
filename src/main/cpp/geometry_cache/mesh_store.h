@@ -14,7 +14,6 @@
 #include <unordered_map>
 #include <queue>
 #include "../render/objects/render_object.h"
-#include "../render/objects/shaders/shaderpack.h"
 #include "../mc_interface/mc_gui_objects.h"
 #include "../mc_interface/mc_objects.h"
 
