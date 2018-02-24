@@ -10,10 +10,7 @@
 #include "gl_shader_program.h"
 
 namespace nova {
-    gl_shader_program::gl_shader_program(const shader_definition &source) : name(source.name) {
-        LOG(TRACE) << "Creating shader with filter expression " << source.filter_expression;
-        filter = source.filter_expression;
-        LOG(TRACE) << "Created filter expression " << filter;
+    gl_shader_program::gl_shader_program(const shader_definition &source) {
         create_shader(source.vertex_source, GL_VERTEX_SHADER);
         LOG(TRACE) << "Creatd vertex shader";
         create_shader(source.fragment_source, GL_FRAGMENT_SHADER);
@@ -22,8 +19,7 @@ namespace nova {
         link();
     }
 
-    gl_shader_program::gl_shader_program(gl_shader_program &&other) noexcept :
-            name(std::move(other.name)), filter(std::move(other.filter)) {
+    gl_shader_program::gl_shader_program(gl_shader_program &&other) noexcept {
 
         this->gl_name = other.gl_name;
 
@@ -34,7 +30,6 @@ namespace nova {
 
     void gl_shader_program::link() {
         gl_name = glCreateProgram();
-        glObjectLabel(GL_PROGRAM, gl_name, (GLsizei) name.length(), name.c_str());
         LOG(TRACE) << "Created shader program " << gl_name;
 
         for(GLuint shader : added_shaders) {
@@ -44,7 +39,7 @@ namespace nova {
         glLinkProgram(gl_name);
         check_for_linking_errors();
 
-        LOG(DEBUG) << "Program " << name << " linked successfully";
+        LOG(DEBUG) << "Program " << gl_name << " linked successfully";
 
         for(GLuint shader : added_shaders) {
             // Clean up our resources. I'm told that this is a good thing.
@@ -83,29 +78,20 @@ namespace nova {
             GLint log_length = 0;
             glGetProgramiv(gl_name, GL_INFO_LOG_LENGTH, &log_length);
 
-            GLchar *info_log = (GLchar *) malloc(log_length * sizeof(GLchar));
+            auto *info_log = (GLchar *) malloc(log_length * sizeof(GLchar));
             glGetProgramInfoLog(gl_name, log_length, &log_length, info_log);
 
             if(log_length > 0) {
                 glDeleteProgram(gl_name);
 
                 LOG(ERROR) << "Error linking program " << gl_name << ":\n" << info_log;
-
-                throw program_linking_failure(name);
             }
 
         }
     }
 
     void gl_shader_program::bind() noexcept {
-        //LOG(INFO) << "Binding program " << name;
         glUseProgram(gl_name);
-    }
-
-    gl_shader_program::~gl_shader_program() {
-        // Commented because move semantics are hard
-        //LOG(DEBUG) << "Deleting program " << gl_name;
-        //glDeleteProgram(gl_name);
     }
 
     void gl_shader_program::create_shader(const std::vector<shader_line>& shader_source, const GLenum shader_type) {

@@ -44,7 +44,7 @@ namespace nova {
 			return e;
 		}
 		return { 0,0,0,0 };
-	};
+	}
 
 
 	void input_handler::queue_mouse_position_event(struct mouse_position_event e) {

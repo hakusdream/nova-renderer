@@ -14,7 +14,7 @@
 #include <unordered_map>
 
 #include "shader_source_structs.h"
-#include "pass.h"
+#include "../../render/objects/pass.h"
 #include "../../render/objects/shaders/shaderpack.h"
 
 namespace fs = std::experimental::filesystem;
@@ -48,7 +48,7 @@ namespace nova {
      */
     std::unordered_map<std::string, pass> load_passes_from_folder(const fs::path& shaderpack_path);
 
-    std::unordered_map<std::string, pass> get_material_definitions(const nlohmann::json &shaders_json);
+    std::unordered_map<std::string, pass> parse_passes_from_json(const nlohmann::json &shaders_json);
 
     /*!
      * \brief Gets a list of all the files in the given folder
@@ -56,7 +56,7 @@ namespace nova {
      * \param shaderpack_name The name of the shaderpack to get the names of the shaders in
      * \return The names of all the shaders in
      */
-    std::vector<std::string> get_shader_names_in_folder(const fs::path& shaderpack_path);
+    std::vector<fs::path> get_shader_names_in_folder(const fs::path& shaderpack_path);
 
     /*!
      * \brief Loads the source file of all the shaders with the provided names
@@ -65,53 +65,10 @@ namespace nova {
      * in a way I didn't explicitly anticipate
      *
      * \param shaderpack_name The name of the shaderpack to load the shaders from
-     * \param shader_names The list of names of shaders to load
-     * \return A map from shader name to shader source
+     * \param passes The list of names of shaders to load
+     * \return The loaded shaderpack
      */
-    shaderpack load_sources_from_folder(const std::string &shaderpack_name, const std::vector<std::string> &shader_names);
-
-    /*!
-     * \brief Tries to load a single shader file from a folder
-     *
-     * Tries appending each string in extensions to the shader path. If one of the extensions is a real extension
-     * of the file, returns the full text of the file. If the file cannot be found with any of the provided
-     * extensions, then a not_found is thrown
-     *
-     * \param shader_path The path to the shader
-     * \param extensions A list of extensions to try
-     * \return The full source of the shader file
-     */
-    std::vector<shader_line> load_shader_file(const std::string &shader_path, const std::vector<std::string> &extensions);
-
-    /*!
-     * \brief Loads the shader file from the provided istream
-     *
-     * \param stream The istream to load the shader file from
-     * \param shader_path The path to the shader file (useful mostly for includes)
-     * \return A list of shader_line objects
-     */
-    std::vector<shader_line> read_shader_stream(std::istream &stream, const std::string &shader_path);
-
-    /*!
-     * \brief Loads a file that was requested through a #include statement
-     *
-     * This function will recursively include files. There's nothing to check for an infinite include loop, so try to
-     * not have any
-     *
-     * \param shader_path The path to the shader that includes the file
-     * \param line The line in the shader that contains the #include statement
-     * \return The full source of the included file
-     */
-    std::vector<shader_line> load_included_file(const std::string &shader_path, const std::string &line);
-
-    /*!
-     * \brief Determines the full file path of an included file
-     *
-     * \param shader_path The path to the current shader
-     * \param included_file_name The name of the file to include
-     * \return The path to the included file
-     */
-    auto get_included_file_path(const std::string &shader_path, const std::string &included_file_name);
+    std::unordered_map<std::string, shader_definition> load_sources_from_folder(const fs::path &shaderpack_name, const std::unordered_map<std::string, pass> &passes);
 
     /*!
      * \brief Extracts the filename from the #include line
@@ -125,32 +82,21 @@ namespace nova {
      * \param include_line The line with the #include statement on it
      * \return The filename that is being included
      */
-    std::string get_filename_from_include(const std::string include_line);
+    std::string get_filename_from_include(const std::string& include_line);
 
     /*!
-     * \brief Figures out the names of the shaders to load into this shaderpack based on the given json structure
+     * \brief Loads the JSON for the default Bedrock material files
      *
-     * \param shaders_json The JSON structure with the names of all the shaders to load
-     * \return A list of all the shader_definition objects described by the given JSON
+     * \return The JSON for the default Bedrock material files
      */
-    std::vector<shader_definition> get_shader_definitions(nlohmann::json &shaders_json);
+    nlohmann::json& default_bedrock_passes();
 
     /*!
-     * \brief Prints our a warning for every shader described in the shaders.json file which does not specify a
-     * fallback shader
+     * \brief Loads the JSON for the default Optifine passes
      *
-     * \param shaders The list of shader definitions from the shaders.json file
+     * \return The JSON for the default Optifine passes
      */
-    void warn_for_missing_fallbacks(std::vector<shader_definition> shaders);
-
-    /*!
-     * \brief Loads the default shader.json file from disk
-     *
-     * This function caches the shaders.json file, so it should only load once
-     *
-     * \return The default shader.json file, as a json data structure
-     */
-    nlohmann::json& get_default_shaders_json();
+    nlohmann::json& default_optifine_passes();
 }
 
 #endif //RENDERER_SHADER_LOADING_H_H

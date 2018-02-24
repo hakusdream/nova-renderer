@@ -7,19 +7,6 @@
 #include <easylogging++.h>
 
 namespace nova {
-    shader_definition::shader_definition(nlohmann::json& json)  {
-        name = json["name"].get<std::string>();
-
-        LOG(DEBUG) << "Creating shader definition from json " << json;
-
-        filter_expression = json["filters"].get<std::string>();
-
-        if(json.find("fallback") != json.end()) {
-            std::string fallback_name_str = json["fallback"];
-            fallback_name = optional<std::string>(fallback_name_str);
-        }
-    }
-
     el::base::Writer& operator<<(el::base::Writer& out, const std::vector<shader_line>& lines) {
         for(const auto& line : lines) {
             out << line;

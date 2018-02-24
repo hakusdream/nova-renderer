@@ -6,9 +6,11 @@
 #ifndef RENDERER_MATERIAL_STATE_H
 #define RENDERER_MATERIAL_STATE_H
 
-#include <optional.hpp>
-#include <json.hpp>
+#include "../../3rdparty/optional/optional.hpp"
+#include "../../3rdparty/json/src/json.hpp"
+#include "../../3rdparty/glad/include/glad/glad.h"
 #include "../../utils/smart_enum.h"
+#include "shaders/gl_shader_program.h"
 
 using namespace std::experimental;
 
@@ -558,6 +560,8 @@ namespace nova {
          * \brief The textures that this pass will write to
          */
         optional<std::vector<texture_resource>> texture_outputs;
+
+        std::shared_ptr<gl_shader_program> program;
 
         /*!
          * \brief Constructs a new pass from the provided JSON

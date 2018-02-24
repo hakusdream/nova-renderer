@@ -11,6 +11,7 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include <experimental/filesystem>
 
 #include <optional.hpp>
 #include <json.hpp>
@@ -19,6 +20,8 @@
 
 // While I usually don't like to do this, I'm tires of typing so much
 using namespace std::experimental;
+
+namespace fs = std::experimental::filesystem;
 
 namespace nova {
     /*!
@@ -29,7 +32,7 @@ namespace nova {
      */
     struct shader_line {
         int line_num;               //!< The line number in the original source file
-        std::string shader_name;    //!< The name of the original source file
+        fs::path shader_name;    //!< The name of the original source file
         std::string line;           //!< The actual line
     };
 
@@ -37,22 +40,15 @@ namespace nova {
      * \brief Represents a shader before it goes to the GPU
      */
     struct shader_definition {
-        std::string name;
-        std::string filter_expression;
         optional<std::string> fallback_name;
 
         optional<std::shared_ptr<shader_definition>> fallback_def;
 
         std::vector<shader_line> vertex_source;
         std::vector<shader_line> fragment_source;
-        // TODO: Figure out how to handle geometry and tessellation shaders
-
-        /*!
-         * \brief The framebuffer attachments that this shader writes to
-         */
-        std::vector<unsigned int> drawbuffers;
-
-        shader_definition(nlohmann::json &json);
+        std::vector<shader_line> geometry_source;
+        std::vector<shader_line> tessellation_control_source;
+        std::vector<shader_line> tessellation_evaluation_source;
     };
 
     el::base::Writer& operator<<(el::base::Writer& out, const std::vector<shader_line>& lines);

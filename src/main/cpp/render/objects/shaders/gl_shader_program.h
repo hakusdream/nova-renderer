@@ -75,7 +75,7 @@ namespace nova {
         /*!
          * \brief Default copy constructor
          *
-         * \param other The thing to copygit add -A :/
+         * \param other The thing to copy
          */
 		gl_shader_program(const gl_shader_program &other) = default;
 
@@ -90,18 +90,9 @@ namespace nova {
         gl_shader_program() = default;
 
         /*!
-         * \brief Deletes this shader and all it holds dear
-         */
-        ~gl_shader_program();
-
-        /*!
          * \brief Sets this shader as the currently active shader
          */
         void bind() noexcept;
-
-        std::string& get_filter() noexcept;
-
-        std::string& get_name() noexcept;
 
         /*!
          * \brief Finds the uniform location of the given uniform variable
@@ -116,8 +107,6 @@ namespace nova {
         GLint get_uniform_location(std::string uniform_name);
 
     private:
-        std::string name;
-
         std::vector<GLuint> added_shaders;
 
         std::unordered_map<std::string, GLint> uniform_locations;
