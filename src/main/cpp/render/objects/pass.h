@@ -325,6 +325,33 @@ namespace nova {
     struct texture_resource {
         /*!
          * \brief The name of the texture
+         *
+         * Nova implicitly defines a few textures for you to use:
+         * - ColorVirtualTexture
+         *      - Virtual texture atlas that holds color textures
+         *      - Textures which have the exact name as requested by Minecraft are in this atlas
+         *      - Things without a color texture get a pure white texture
+         *      - Always has a format of R8G8B8A8
+         *      - Can only be used as a pass's input
+         * - NormalVirtualTexture
+         *      - Virtual texture atlas that holds normal textures
+         *      - Textures which have `_n` after the name requested by Minecraft are in this atlas
+         *      - If no normal texture exists for a given object, a texture with RGBA of (0, 0, 1, 1) is used
+         *      - Always has a format of R8G8B8A8
+         *      - Can only be used as a pass's input
+         * - DataVirtualTexture
+         *      - Virtual texture atlas that holds data textures
+         *      - Textures which have a `_s` after the name requested by Minecraft are in this atlas
+         *      - If no data texture exists for a given object, a texture with an RGBA of (0, 0, 0, 0) is used
+         *      - Always has a format of R8G8B8A8
+         *      - Can only be used as a pass's input
+         * - Backbuffer
+         *      - The texture that gets presented to the screen
+         *      - Always has a format of R8G8B8
+         *      - Can only be used as a pass's output
+         *
+         * If you use one of the virtual textures, then all fields except the binding are ignored
+         * If you use `Backbuffer`, then all fields are ignored since the backbuffer is always bound to output location 0
          */
         std::string name;
 

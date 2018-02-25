@@ -9,6 +9,7 @@
 
 #include <easylogging++.h>
 #include <glm/gtc/matrix_transform.hpp>
+#include <stack>
 
 INITIALIZE_EASYLOGGINGPP
 
@@ -256,6 +257,13 @@ namespace nova {
     }
 
     void nova_renderer::load_new_shaderpack(const std::string &new_shaderpack_name) {
+        LOG(INFO) << "Loading shaderpack " << new_shaderpack_name << "...";
+        auto passes = load_shaderpack(new_shaderpack_name);
+
+        LOG(INFO) << "Compiling passes...";
+        passes_list = compile_into_list(passes);
+
+
 		/*LOG(INFO) << "Loading a new shaderpack";
         LOG(INFO) << "Name of shaderpack " << new_shaderpack_name;
         loaded_shaderpack = std::make_shared<shaderpack>(load_shaderpack(new_shaderpack_name));
@@ -386,6 +394,30 @@ namespace nova {
 
     camera &nova_renderer::get_player_camera() {
         return player_camera;
+    }
+
+    std::vector<pass> nova_renderer::compile_into_list(std::unordered_map<std::string, pass> passes) {
+        std::vector<std::string> passes_dependency_order;
+
+        /*
+         * should passes have dependencies?
+         * pros:
+         *  - Easy to specify lots of sequential passes
+         * Cons:
+         *  - Much more difficult to order passes - have to consider both pass dependencies and inputs
+         *
+         * No dependenices:
+         * Pros:
+         *  - Easier code
+         * Cons:
+         *   - More complex to specify a series of sequential passes
+         */
+
+        for(const auto& item : passes) {
+
+        }
+
+        return std::vector<pass>();
     }
 
     void link_up_uniform_buffers(std::unordered_map<std::string, gl_shader_program> &shaders, uniform_buffer_store &ubos) {

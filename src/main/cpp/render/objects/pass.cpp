@@ -183,6 +183,11 @@ namespace nova {
     texture_resource decode_texture_resource(const nlohmann::json& json) {
         auto ret_val = texture_resource{};
 
+        // TODO: Check for the implicitly defined textures and use those instead of reading from JSON
+
+        // TODO: The pass should only say the name of the texture it uses. We'll have a separate list of textures that
+        // TODO: we read from - which makes using implicitly defined textures trivial for the user
+
         ret_val.binding = get_json_value<uint32_t>(json, "binding").value();
         ret_val.format = get_json_value<texture_format_enum>(json, "format", texture_format_enum::from_string).value();
         ret_val.height = get_json_value<uint32_t>(json, "height").value();
