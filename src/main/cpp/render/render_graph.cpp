@@ -55,6 +55,11 @@ namespace nova {
             ordered_passes.insert(ordered_passes.end(), backbuffer_writes.begin(), backbuffer_writes.end());
 
             add_dependent_passes(backbuffer_writes);
+
+            ordered_passes = std::vector{ordered_passes.rbegin(), ordered_passes.rend()};
+            // We're going to loop through the original list of passes and remove them from the original list of passes
+            // We want to keep the original passes around
+            const auto original_ordered_passes = ordered_passes;
         }
     }
 
