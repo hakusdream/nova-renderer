@@ -3,12 +3,12 @@
  * \date 21-Feb-18.
  */
 
-#include "pass.h"
+#include "render_pass.h"
 #include <easylogging++.h>
 #include "../../utils/utils.h"
 
 namespace nova {
-    pass::pass(const std::string& pass_name, const optional<std::string>& parent_pass_name, const nlohmann::json& pass_json) :
+    render_pass::render_pass(const std::string& pass_name, const optional<std::string>& parent_pass_name, const nlohmann::json& pass_json) :
         name(pass_name), parent_name(parent_pass_name) {
 
         states = get_json_value<std::vector<state_enum>>(pass_json, "states", [&](const auto& states) {

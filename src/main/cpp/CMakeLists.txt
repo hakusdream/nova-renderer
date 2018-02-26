@@ -107,7 +107,7 @@ set(NOVA_HEADERS
 
         render/objects/context/gl_render_context.h
         utils/stb_image_write.h
-        render/objects/pass.h
+        render/objects/render_pass.h
         )
 
 set(NOVA_SOURCE
@@ -147,8 +147,8 @@ set(NOVA_SOURCE
         data_loading/direct_buffers.cpp
         render/objects/render_object.cpp
         utils/profiler.cpp
-        render/objects/pass.cpp
-        render/objects/context/gl_render_context.cpp data_loading/loaders/shader_file_loading.cpp)
+        render/objects/render_pass.cpp
+        render/objects/context/gl_render_context.cpp data_loading/loaders/shader_file_loading.cpp render/render_graph.cpp render/render_graph.h)
 
 if (WIN32)
     set(NOVA_SOURCE ${NOVA_SOURCE} ${NOVA_HEADERS} 3rdparty/renderdocapi/RenderDocManager.cpp data_loading/loaders/shader_zip_loading.cpp)

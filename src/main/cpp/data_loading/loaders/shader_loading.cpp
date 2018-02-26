@@ -67,7 +67,7 @@ namespace nova {
     bool contains_bedrock_files(std::vector<filesystem::path> &files);
     bool contains_optifine_files(std::vector<filesystem::path> &files);
 
-    std::unordered_map<std::string, pass> load_shaderpack(const std::string &shaderpack_name) {
+    std::unordered_map<std::string, render_pass> load_shaderpack(const std::string &shaderpack_name) {
         // Load the passes
         //  - Check if there's passes in the shaderpack
         //  - If so, identify if there are a complete set of passes
@@ -102,7 +102,7 @@ namespace nova {
 
             auto shaderpack_directory = fs::path("shaderpacks") / shaderpack_name;
 
-            std::unordered_map<std::string, pass> passes = load_passes_from_folder(shaderpack_directory);
+            std::unordered_map<std::string, render_pass> passes = load_passes_from_folder(shaderpack_directory);
             if(passes.empty()) {
                 LOG(WARNING) << "No passes defines by shaderpack " << shaderpack_name << ". Attempting to guess the intended shaderpack format";
 
@@ -157,7 +157,7 @@ namespace nova {
     }
 
     template<typename Type>
-    void fill_in_material_state_field(const std::string& our_name, std::unordered_map<std::string, pass>& all_materials, std::function<optional<Type>&(pass&)> get_field_from_material) {
+    void fill_in_material_state_field(const std::string& our_name, std::unordered_map<std::string, render_pass>& all_materials, std::function<optional<Type>&(render_pass&)> get_field_from_material) {
         auto &us = all_materials[our_name];
         auto &cur_state = us;
         bool value_found = (bool) get_field_from_material(us);
@@ -179,12 +179,12 @@ namespace nova {
     }
 
     template<typename Type>
-    void fill_field(const std::string& name, std::unordered_map<std::string, pass> materials, optional<Type> pass::* ptr) {
-        fill_in_material_state_field<Type>(name, materials, [ptr](pass& s) -> optional<Type>&{ return s.*ptr; });
+    void fill_field(const std::string& name, std::unordered_map<std::string, render_pass> materials, optional<Type> render_pass::* ptr) {
+        fill_in_material_state_field<Type>(name, materials, [ptr](render_pass& s) -> optional<Type>&{ return s.*ptr; });
     }
 
-    std::unordered_map<std::string, pass> parse_passes_from_json(const nlohmann::json &shaders_json) {
-        std::unordered_map<std::string, pass> definition_map;
+    std::unordered_map<std::string, render_pass> parse_passes_from_json(const nlohmann::json &shaders_json) {
+        std::unordered_map<std::string, render_pass> definition_map;
         for(auto itr = shaders_json.begin(); itr != shaders_json.end(); ++itr) {
             auto material_state_name = itr.key();
             auto json_node = itr.value();
@@ -197,7 +197,7 @@ namespace nova {
                 material_state_name = material_state_name.substr(0, colon_pos);
             }
 
-            auto material = pass(material_state_name, parent_state_name, json_node);
+            auto material = render_pass(material_state_name, parent_state_name, json_node);
             definition_map[material_state_name] = material;
             LOG(TRACE) << "Inserted a material named " << material_state_name;
         }
@@ -212,36 +212,36 @@ namespace nova {
                 continue;
             }
 
-            fill_field(item.first, definition_map, &pass::defines);
-            fill_field(item.first, definition_map, &pass::states);
-            fill_field(item.first, definition_map, &pass::vertex_shader);
-            fill_field(item.first, definition_map, &pass::fragment_shader);
-            fill_field(item.first, definition_map, &pass::geometry_shader);
-            fill_field(item.first, definition_map, &pass::tessellation_evaluation_shader);
-            fill_field(item.first, definition_map, &pass::tessellation_control_shader);
-            fill_field(item.first, definition_map, &pass::vertex_fields);
-            fill_field(item.first, definition_map, &pass::front_face);
-            fill_field(item.first, definition_map, &pass::back_face);
-            fill_field(item.first, definition_map, &pass::sampler_states);
-            fill_field(item.first, definition_map, &pass::textures);
-            fill_field(item.first, definition_map, &pass::filters);
-            fill_field(item.first, definition_map, &pass::fallback);
-            fill_field(item.first, definition_map, &pass::depth_bias);
-            fill_field(item.first, definition_map, &pass::slope_scaled_depth_bias);
-            fill_field(item.first, definition_map, &pass::stencil_ref);
-            fill_field(item.first, definition_map, &pass::stencil_read_mask);
-            fill_field(item.first, definition_map, &pass::stencil_write_mask);
-            fill_field(item.first, definition_map, &pass::msaa_support);
-            fill_field(item.first, definition_map, &pass::primitive_mode);
-            fill_field(item.first, definition_map, &pass::source_blend_factor);
-            fill_field(item.first, definition_map, &pass::destination_blend_factor);
-            fill_field(item.first, definition_map, &pass::alpha_src);
-            fill_field(item.first, definition_map, &pass::alpha_dst);
-            fill_field(item.first, definition_map, &pass::depth_func);
-            fill_field(item.first, definition_map, &pass::render_queue);
-            fill_field(item.first, definition_map, &pass::dependencies);
-            fill_field(item.first, definition_map, &pass::texture_inputs);
-            fill_field(item.first, definition_map, &pass::texture_outputs);
+            fill_field(item.first, definition_map, &render_pass::defines);
+            fill_field(item.first, definition_map, &render_pass::states);
+            fill_field(item.first, definition_map, &render_pass::vertex_shader);
+            fill_field(item.first, definition_map, &render_pass::fragment_shader);
+            fill_field(item.first, definition_map, &render_pass::geometry_shader);
+            fill_field(item.first, definition_map, &render_pass::tessellation_evaluation_shader);
+            fill_field(item.first, definition_map, &render_pass::tessellation_control_shader);
+            fill_field(item.first, definition_map, &render_pass::vertex_fields);
+            fill_field(item.first, definition_map, &render_pass::front_face);
+            fill_field(item.first, definition_map, &render_pass::back_face);
+            fill_field(item.first, definition_map, &render_pass::sampler_states);
+            fill_field(item.first, definition_map, &render_pass::textures);
+            fill_field(item.first, definition_map, &render_pass::filters);
+            fill_field(item.first, definition_map, &render_pass::fallback);
+            fill_field(item.first, definition_map, &render_pass::depth_bias);
+            fill_field(item.first, definition_map, &render_pass::slope_scaled_depth_bias);
+            fill_field(item.first, definition_map, &render_pass::stencil_ref);
+            fill_field(item.first, definition_map, &render_pass::stencil_read_mask);
+            fill_field(item.first, definition_map, &render_pass::stencil_write_mask);
+            fill_field(item.first, definition_map, &render_pass::msaa_support);
+            fill_field(item.first, definition_map, &render_pass::primitive_mode);
+            fill_field(item.first, definition_map, &render_pass::source_blend_factor);
+            fill_field(item.first, definition_map, &render_pass::destination_blend_factor);
+            fill_field(item.first, definition_map, &render_pass::alpha_src);
+            fill_field(item.first, definition_map, &render_pass::alpha_dst);
+            fill_field(item.first, definition_map, &render_pass::depth_func);
+            fill_field(item.first, definition_map, &render_pass::render_queue);
+            fill_field(item.first, definition_map, &render_pass::dependencies);
+            fill_field(item.first, definition_map, &render_pass::texture_inputs);
+            fill_field(item.first, definition_map, &render_pass::texture_outputs);
 
             LOG(TRACE) << "Filed in all fields on material " << cur_state.name;
         }

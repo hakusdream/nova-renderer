@@ -14,7 +14,7 @@
 #include <unordered_map>
 
 #include "shader_source_structs.h"
-#include "../../render/objects/pass.h"
+#include "../../render/objects/render_pass.h"
 
 namespace fs = std::experimental::filesystem;
 
@@ -25,7 +25,7 @@ namespace nova {
      * \param shaderpack_name The name of the shaderpack file to load things from
      * \return A map from pass name to pass of all the passes found in that zip
      */
-    std::unordered_map<std::string, pass> load_passes_from_zip(const std::string& shaderpack_name);
+    std::unordered_map<std::string, render_pass> load_passes_from_zip(const std::string& shaderpack_name);
 
     /*!
      * \brief Loads the source file of all the shaders with the provided names
@@ -45,9 +45,9 @@ namespace nova {
      * \param shaderpack_path The name of the shaderpack folder to load things from
      * \return A map from pass name to pass of all the passes found in that folder
      */
-    std::unordered_map<std::string, pass> load_passes_from_folder(const fs::path& shaderpack_path);
+    std::unordered_map<std::string, render_pass> load_passes_from_folder(const fs::path& shaderpack_path);
 
-    std::unordered_map<std::string, pass> parse_passes_from_json(const nlohmann::json &shaders_json);
+    std::unordered_map<std::string, render_pass> parse_passes_from_json(const nlohmann::json &shaders_json);
 
     /*!
      * \brief Gets a list of all the files in the given folder
@@ -67,7 +67,7 @@ namespace nova {
      * \param passes The list of names of shaders to load
      * \return The loaded shaderpack
      */
-    std::unordered_map<std::string, shader_definition> load_sources_from_folder(const fs::path &shaderpack_name, const std::unordered_map<std::string, pass> &passes);
+    std::unordered_map<std::string, shader_definition> load_sources_from_folder(const fs::path &shaderpack_name, const std::unordered_map<std::string, render_pass> &passes);
 
     /*!
      * \brief Extracts the filename from the #include line

@@ -407,7 +407,7 @@ namespace nova {
      * straight from the parent, and each field that is present in the child is not changed. That is to say, vectors
      * are NOT combined between the child and parent
      */
-    struct pass {
+    struct render_pass {
         /*!
          * \brief The name of this material_state
          */
@@ -582,11 +582,11 @@ namespace nova {
         /*!
          * \brief The textures that this pass will read from
          */
-        optional<std::vector<texture_resource>> texture_inputs;
+        optional<std::vector<std::string>> texture_inputs;
         /*!
          * \brief The textures that this pass will write to
          */
-        optional<std::vector<texture_resource>> texture_outputs;
+        optional<std::vector<std::string>> texture_outputs;
 
         std::shared_ptr<gl_shader_program> program;
 
@@ -600,9 +600,9 @@ namespace nova {
          * \param parent_pass_name The name of the pass that this pass inherits from
          * \param pass_json The JSON that this pass will be created from
          */
-        pass(const std::string& pass_name, const optional<std::string>& parent_pass_name, const nlohmann::json& pass_json);
+        render_pass(const std::string& pass_name, const optional<std::string>& parent_pass_name, const nlohmann::json& pass_json);
 
-        pass() = default;
+        render_pass() = default;
     };
 
     /*!

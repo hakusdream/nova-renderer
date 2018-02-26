@@ -82,13 +82,13 @@ namespace nova {
      */
     fs::path get_included_file_path(const fs::path &shader_path, const fs::path &included_file_name);
 
-    std::unordered_map<std::string, pass> load_passes_from_folder(const fs::path &shaderpack_path) {
+    std::unordered_map<std::string, render_pass> load_passes_from_folder(const fs::path &shaderpack_path) {
         auto materials_path = shaderpack_path / "materials";
         if(materials_path.empty()) {
             return {};
         }
 
-        auto passes_map = std::unordered_map<std::string, pass>{};
+        auto passes_map = std::unordered_map<std::string, render_pass>{};
         auto materials_itr = fs::directory_iterator(materials_path);
 
         for(const auto& item : materials_itr) {
@@ -126,7 +126,7 @@ namespace nova {
         return filenames;
     }
 
-    std::unordered_map<std::string, shader_definition> load_sources_from_folder(const fs::path &shaderpack_name, const std::unordered_map<std::string, pass> &passes) {
+    std::unordered_map<std::string, shader_definition> load_sources_from_folder(const fs::path &shaderpack_name, const std::unordered_map<std::string, render_pass> &passes) {
         std::unordered_map<std::string, shader_definition> sources;
 
         for(const auto& item : passes) {

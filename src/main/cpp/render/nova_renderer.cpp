@@ -396,7 +396,7 @@ namespace nova {
         return player_camera;
     }
 
-    std::vector<pass> nova_renderer::compile_into_list(std::unordered_map<std::string, pass> passes) {
+    std::vector<render_pass> nova_renderer::compile_into_list(std::unordered_map<std::string, render_pass> passes) {
         std::vector<std::string> passes_dependency_order;
 
         /*
@@ -413,11 +413,17 @@ namespace nova {
          *   - More complex to specify a series of sequential passes
          */
 
+        // First pass: Find the passes that write to the backbuffer and add those to the
+        std::vector<std::string> added_passes;
         for(const auto& item : passes) {
-
+            const auto& pass = item.second;
+            if(pass.texture_outputs.find("backbuffer") != pass.texture_outputs.end()) {
+                passes_dependency_order.push_back(item.first);
+                added_passes.push_back(item.first);
+            }
         }
 
-        return std::vector<pass>();
+        return std::vector<render_pass>();
     }
 
     void link_up_uniform_buffers(std::unordered_map<std::string, gl_shader_program> &shaders, uniform_buffer_store &ubos) {
