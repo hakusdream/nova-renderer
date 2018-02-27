@@ -10,44 +10,29 @@
 #include "objects/textures/texture_manager.h"
 
 namespace nova {
+    /*!
+     * \brief Thrown by `order_passes` when it encounters a fatal error in the render graph
+     */
     class render_graph_validation_error : public std::exception {
     public:
-        explicit render_graph_validation_error(std::string& msg);
-        virtual const char* what();
+        explicit render_graph_validation_error(std::string msg);
+        const char* what() const override;
     private:
         std::string msg;
     };
 
     /*!
-    * \brief A render graph has all the passes defined by a shaderpack
-    */
-    class render_graph {
-    public:
-        /*!
-         * \brief Initializes this render graph with the provided passes, compiling the passes into the final execution
-         * order
-         * \param passes The render passes that this render graph is build from
-         * \throws render_graph_validation_error if there's an error validating this render graph
-         */
-        explicit render_graph(std::unordered_map<std::string, render_pass> passes);
-
-        void compile();
-
-    private:
-        std::unordered_map<std::string, render_pass> passes;
-
-        /*!
-         * \brief Adds all the passes that are dependent on at least one of the passes in `passes_just_added` to the
-         * list of ordered passes
-         *
-         * \param passes_just_added The passes that were just added to the list of ordered passes
-         */
-        void add_dependent_passes(const std::vector<std::string> &passes_just_added);
-
-        std::vector<std::string> ordered_passes;
-        std::unordered_map<std::string, std::vector<std::string>> resource_to_write_pass;
-        std::unordered_map<std::string, std::vector<std::string>> resource_to_read_pass;
-    };
+     * \brief Orders the provided render passes to satisfy both their implicit and explicit dependencies
+     *
+     * The provided submission order may not be valid for all sets of passes. It is pretty un-optimized, preferring to
+     * execute a pass earlier in the frame - so it may lead to some stalls somewhere? But I'm using OpenGL and the
+     * driver deals with all that. There's things I can do that will give me much higher framerate gains than optimizing
+     * the submission order
+     *
+     * \param passes A map from pass name to pass of all the passes to order
+     * \return The names of the passes in submission order
+     */
+    std::vector<std::string> order_passes(const std::unordered_map<std::string, render_pass>& passes);
 }
 
 #endif //RENDERER_RENDER_GRAPH_H

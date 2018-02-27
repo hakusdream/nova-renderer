@@ -6,6 +6,7 @@
 #include "../utils/utils.h"
 #include "../data_loading/loaders/loaders.h"
 #include "../utils/profiler.h"
+#include "render_graph.h"
 
 #include <easylogging++.h>
 #include <glm/gtc/matrix_transform.hpp>
@@ -260,20 +261,25 @@ namespace nova {
         LOG(INFO) << "Loading shaderpack " << new_shaderpack_name << "...";
         auto passes = load_shaderpack(new_shaderpack_name);
 
-        LOG(INFO) << "Compiling passes...";
-        passes_list = compile_into_list(passes);
+        try {
+            LOG(INFO) << "Compiling passes...";
+            passes_list = compile_into_list(passes);
+        } catch(render_graph_validation_error& e) {
+            LOG(ERROR) << "Could not load shaderpack " << new_shaderpack_name << ": " << e.what();
+
+            // TODO: Find a good way to propogate the error
+            return;
+        }
 
 
-		/*LOG(INFO) << "Loading a new shaderpack";
-        LOG(INFO) << "Name of shaderpack " << new_shaderpack_name;
-        loaded_shaderpack = std::make_shared<shaderpack>(load_shaderpack(new_shaderpack_name));
-        LOG(DEBUG) << "Shaderpack loaded, wiring everything together";
-        LOG(INFO) << "Loading complete";
-		
+
+
+		/*
         link_up_uniform_buffers(loaded_shaderpack->get_loaded_shaders(), *ubo_manager);
         LOG(DEBUG) << "Linked up UBOs";
 
-        create_framebuffers_from_shaderpack();*/
+        create_framebuffers_from_shaderpack();
+        */
     }
 
     void nova_renderer::create_framebuffers_from_shaderpack() {
@@ -397,33 +403,14 @@ namespace nova {
     }
 
     std::vector<render_pass> nova_renderer::compile_into_list(std::unordered_map<std::string, render_pass> passes) {
-        std::vector<std::string> passes_dependency_order;
+        auto passes_dependency_order = order_passes(passes);
+        auto ordered_passes = std::vector<render_pass>{};
 
-        /*
-         * should passes have dependencies?
-         * pros:
-         *  - Easy to specify lots of sequential passes
-         * Cons:
-         *  - Much more difficult to order passes - have to consider both pass dependencies and inputs
-         *
-         * No dependenices:
-         * Pros:
-         *  - Easier code
-         * Cons:
-         *   - More complex to specify a series of sequential passes
-         */
-
-        // First pass: Find the passes that write to the backbuffer and add those to the
-        std::vector<std::string> added_passes;
-        for(const auto& item : passes) {
-            const auto& pass = item.second;
-            if(pass.texture_outputs.find("backbuffer") != pass.texture_outputs.end()) {
-                passes_dependency_order.push_back(item.first);
-                added_passes.push_back(item.first);
-            }
+        for(const auto& pass_name : passes_dependency_order) {
+            ordered_passes.push_back(passes[pass_name]);
         }
 
-        return std::vector<render_pass>();
+        return ordered_passes;
     }
 
     void link_up_uniform_buffers(std::unordered_map<std::string, gl_shader_program> &shaders, uniform_buffer_store &ubos) {
