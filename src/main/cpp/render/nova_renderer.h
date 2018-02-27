@@ -16,6 +16,7 @@
 #include "objects/framebuffer.h"
 #include "objects/camera.h"
 #include "objects/render_pass.h"
+#include "open_gl_context.h"
 
 namespace nova {
     /*!
@@ -108,6 +109,8 @@ namespace nova {
 
         std::unique_ptr<uniform_buffer_store> ubo_manager;
 
+        open_gl_context gl_context;
+
         std::vector<GLuint> shadow_depth_textures;
         std::unique_ptr<framebuffer> shadow_framebuffer;
         framebuffer_builder shadow_framebuffer_builder;
@@ -117,19 +120,6 @@ namespace nova {
         framebuffer_builder main_framebuffer_builder;
 
         camera player_camera;
-
-        /*!
-         * \brief Renders the GUI of Minecraft
-         */
-        void render_gui();
-
-        void render_shadow_pass();
-
-        void render_gbuffers();
-
-        void render_composite_passes();
-
-        void render_final_pass();
 
         void enable_debug();
 
@@ -163,6 +153,10 @@ namespace nova {
          * \return A list of the active passes in submission order
          */
         std::vector<render_pass> compile_into_list(std::unordered_map<std::string, render_pass> passes);
+
+        void execute_pass(const render_pass &pass);
+
+        void enable_state(const state_enum &state);
     };
 
     void link_up_uniform_buffers(std::unordered_map<std::string, gl_shader_program> &shaders, uniform_buffer_store &ubos);

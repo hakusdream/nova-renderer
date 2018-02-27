@@ -70,55 +70,11 @@ namespace nova {
         // Make geometry for any new chunks
         meshes->upload_new_geometry();
 
-
-        // upload shadow UBO things
-
-        render_shadow_pass();
-
-        // main_framebuffer->bind();
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        update_gbuffer_ubos();
-
-        render_gbuffers();
-
-        render_composite_passes();
-
-        //glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        render_final_pass();
-
-        // We want to draw the GUI on top of the other things, so we'll render it last
-        // Additionally, I could use the stencil buffer to not draw MC underneath the GUI. Could be a fun
-        // optimization - I'd have to watch out for when the user hides the GUI, though. I can just re-render the
-        // stencil buffer when the GUI screen changes
-        render_gui();
+        for(const auto& pass : passes_list) {
+            execute_pass(pass);
+        }
 
         game_window->end_frame();
-    }
-
-    void nova_renderer::render_shadow_pass() {
-        LOG(TRACE) << "Rendering shadow pass";
-    }
-
-    void nova_renderer::render_gbuffers() {
-        LOG(TRACE) << "Rendering gbuffer pass";
-
-        // TODO: Get shaders with gbuffers prefix, draw transparents last, etc
-    }
-
-    void nova_renderer::render_composite_passes() {
-        LOG(TRACE) << "Rendering composite passes";
-    }
-
-    void nova_renderer::render_final_pass() {
-        LOG(TRACE) << "Rendering final pass";
-        //meshes->get_fullscreen_quad->set_active();
-        //meshes->get_fullscreen_quad->draw();
-    }
-
-    void nova_renderer::render_gui() {
-        LOG(TRACE) << "Rendering GUI";
-        glClear(GL_DEPTH_BUFFER_BIT);
     }
 
     bool nova_renderer::should_end() {
@@ -134,103 +90,66 @@ namespace nova {
 		instance = std::make_unique<nova_renderer>();
     }
 
-    std::string translate_debug_source(GLenum source) {
-        switch(source) {
-            case GL_DEBUG_SOURCE_API:
-                return "API";
-            case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
-                return "window system";
-            case GL_DEBUG_SOURCE_SHADER_COMPILER:
-                return "shader compiler";
-            case GL_DEBUG_SOURCE_THIRD_PARTY:
-                return "third party";
-            case GL_DEBUG_SOURCE_APPLICATION:
-                return "application";
-            case GL_DEBUG_SOURCE_OTHER:
-                return "other";
-            default:
-                return "something else somehow";
+    void nova_renderer::execute_pass(const render_pass &pass) {
+        LOG(TRACE) << "Rendering pass " << pass.name;
+
+        // Setting the default state at the start of each pass will have some performance hit, especially if there's a
+        // lot of passes that use a lot of states... but from what I've seen of Bedrock materials only a couple of
+        // states are used by each pass, so I don't expect a huge performance hit. However, this could be a good place
+        // to optimize if GL calls are taking too much time
+        gl_context.set_default_state();
+
+        if(pass.states) {
+            for(const auto& state : pass.states.value()) {
+                enable_state(state);
+            }
         }
     }
 
-    std::string translate_debug_type(GLenum type) {
-        switch(type) {
-            case GL_DEBUG_TYPE_ERROR:
-                return "error";
-            case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
-                return "some behavior marked deprecated has been used";
-            case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
-                return "something has invoked undefined behavior";
-            case GL_DEBUG_TYPE_PORTABILITY:
-                return "some functionality the user relies upon is not portable";
-            case GL_DEBUG_TYPE_PERFORMANCE:
-                return "code has triggered possible performance issues";
-            case GL_DEBUG_TYPE_MARKER:
-                return "command stream annotation";
-            case GL_DEBUG_TYPE_PUSH_GROUP:
-                return "group pushing";
-            case GL_DEBUG_TYPE_POP_GROUP:
-                return "group popping";
-            case GL_DEBUG_TYPE_OTHER:
-                return "other";
+    void nova_renderer::enable_state(const state_enum &state) {
+        switch(state) {
+            case state_enum::Blending:
+                gl_context.set_blending_enabled(true);
+                break;
+            case state_enum::InvertCuling:
+                gl_context.set_culling_enabled(true);
+                gl_context.set_culling_mode(GL_FRONT);
+                break;
+            case state_enum::DisableCulling:
+                gl_context.set_culling_enabled(false);
+                break;
+            case state_enum::DisableDepthWrite:
+                gl_context.set_depth_write_enabled(false);
+                break;
+            case state_enum::DisableDepthTest:
+                gl_context.set_depth_test_enabled(false);
+                break;
+            case state_enum::EnableStencilTest:
+                gl_context.set_stencil_test_enabled(true);
+                break;
+            case state_enum::StencilWrite:
+                gl_context.set_stencil_write_enabled(true);
+                break;
+            case state_enum::DisableColorWrite:
+                gl_context.set_color_write_enabled(false);
+                break;
+            case state_enum::EnableAlphaToCoverage:
+                gl_context.set_alpha_to_coverage_enabled(true);
+                break;
+            case state_enum::DisableAlphaWrite:
+                gl_context.set_alpha_write_enabled(false);
+                break;
             default:
-                return "something else somwhow";
+                LOG(WARNING) << "State " << state_enum::to_string(state) << " not handled :(";
+                break;
         }
-    }
-
-    void APIENTRY
-    debug_logger(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message,
-                 const void *user_param) {
-        std::string source_name = translate_debug_source(source);
-        std::string type_name = translate_debug_type(type);
-
-        switch(severity) {
-            case GL_DEBUG_SEVERITY_HIGH:
-                LOG(ERROR) << id << " - Message from " << source_name << " of type " << type_name << ": "
-                           << message;
-                break;
-
-            case GL_DEBUG_SEVERITY_MEDIUM:
-                LOG(INFO) << id << " - Message from " << source_name << " of type " << type_name << ": " << message;
-                break;
-
-            case GL_DEBUG_SEVERITY_LOW:
-                LOG(DEBUG) << id << " - Message from " << source_name << " of type " << type_name << ": "
-                           << message;
-                break;
-
-            case GL_DEBUG_SEVERITY_NOTIFICATION:
-                LOG(TRACE) << id << " - Message from " << source_name << " of type " << type_name << ": "
-                           << message;
-                break;
-
-            default:
-                LOG(INFO) << id << " - Message from " << source_name << " of type " << type_name << ": " << message;
-        }
-    }
-
-    void nova_renderer::enable_debug() {
-        glEnable(GL_DEBUG_OUTPUT);
-        glDebugMessageCallback(debug_logger, nullptr);
     }
 
     void nova_renderer::on_config_change(nlohmann::json &new_config) {
 		auto& shaderpack_name = new_config["loadedShaderpack"];
-        LOG(INFO) << "Shaderpack in settings: " << shaderpack_name;
+        load_new_shaderpack(shaderpack_name);
 
-       /* if(!loaded_shaderpack) {
-            LOG(DEBUG) << "There's currenty no shaderpack, so we're loading a new one";
-            load_new_shaderpack(shaderpack_name);
-            return;
-        }
-
-        bool shaderpack_in_settings_is_new = shaderpack_name != loaded_shaderpack->get_name();
-        if(shaderpack_in_settings_is_new) {
-            LOG(DEBUG) << "Shaderpack " << shaderpack_name << " is about to replace shaderpack " << loaded_shaderpack->get_name();
-            load_new_shaderpack(shaderpack_name);
-        }*/
-
-        LOG(DEBUG) << "Finished dealing with possible new shaderpack";
+        LOG(DEBUG) << "Finished dealing with new shaderpack";
     }
 
     void nova_renderer::on_config_loaded(nlohmann::json &config) {
@@ -258,6 +177,20 @@ namespace nova {
     }
 
     void nova_renderer::load_new_shaderpack(const std::string &new_shaderpack_name) {
+        /*
+         * We need to:
+         *  - Load the render passes. A render pass has a shader, so that's fine
+         *  - Fill in the render passes from the values in the shader comments and shader.properties and whatever other
+         *      datafiles Optifine uses :(
+         *  - Load the resources file from the shaderpack (or use the default one if the shaderpack doesn't provide one)
+         */
+
+        /*
+         * Load the render passes. The loading functions should fill in values from the shaderpack and load in shader
+         * settings that the shader files are old enough to define
+         *
+         * TODO: Examine shaders for rendering parameters
+         */
         LOG(INFO) << "Loading shaderpack " << new_shaderpack_name << "...";
         auto passes = load_shaderpack(new_shaderpack_name);
 
@@ -267,7 +200,7 @@ namespace nova {
         } catch(render_graph_validation_error& e) {
             LOG(ERROR) << "Could not load shaderpack " << new_shaderpack_name << ": " << e.what();
 
-            // TODO: Find a good way to propogate the error
+            // TODO: Find a good way to propagate the error
             return;
         }
 
@@ -415,6 +348,86 @@ namespace nova {
 
     void link_up_uniform_buffers(std::unordered_map<std::string, gl_shader_program> &shaders, uniform_buffer_store &ubos) {
         nova::foreach(shaders, [&](auto shader) { ubos.register_all_buffers_with_shader(shader.second); });
+    }
+
+    std::string translate_debug_source(GLenum source) {
+        switch(source) {
+            case GL_DEBUG_SOURCE_API:
+                return "API";
+            case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
+                return "window system";
+            case GL_DEBUG_SOURCE_SHADER_COMPILER:
+                return "shader compiler";
+            case GL_DEBUG_SOURCE_THIRD_PARTY:
+                return "third party";
+            case GL_DEBUG_SOURCE_APPLICATION:
+                return "application";
+            case GL_DEBUG_SOURCE_OTHER:
+                return "other";
+            default:
+                return "something else somehow";
+        }
+    }
+
+    std::string translate_debug_type(GLenum type) {
+        switch(type) {
+            case GL_DEBUG_TYPE_ERROR:
+                return "error";
+            case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+                return "some behavior marked deprecated has been used";
+            case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+                return "something has invoked undefined behavior";
+            case GL_DEBUG_TYPE_PORTABILITY:
+                return "some functionality the user relies upon is not portable";
+            case GL_DEBUG_TYPE_PERFORMANCE:
+                return "code has triggered possible performance issues";
+            case GL_DEBUG_TYPE_MARKER:
+                return "command stream annotation";
+            case GL_DEBUG_TYPE_PUSH_GROUP:
+                return "group pushing";
+            case GL_DEBUG_TYPE_POP_GROUP:
+                return "group popping";
+            case GL_DEBUG_TYPE_OTHER:
+                return "other";
+            default:
+                return "something else somwhow";
+        }
+    }
+
+    void APIENTRY
+    debug_logger(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message,
+                 const void *user_param) {
+        std::string source_name = translate_debug_source(source);
+        std::string type_name = translate_debug_type(type);
+
+        switch(severity) {
+            case GL_DEBUG_SEVERITY_HIGH:
+                LOG(ERROR) << id << " - Message from " << source_name << " of type " << type_name << ": "
+                           << message;
+                break;
+
+            case GL_DEBUG_SEVERITY_MEDIUM:
+                LOG(INFO) << id << " - Message from " << source_name << " of type " << type_name << ": " << message;
+                break;
+
+            case GL_DEBUG_SEVERITY_LOW:
+                LOG(DEBUG) << id << " - Message from " << source_name << " of type " << type_name << ": "
+                           << message;
+                break;
+
+            case GL_DEBUG_SEVERITY_NOTIFICATION:
+                LOG(TRACE) << id << " - Message from " << source_name << " of type " << type_name << ": "
+                           << message;
+                break;
+
+            default:
+                LOG(INFO) << id << " - Message from " << source_name << " of type " << type_name << ": " << message;
+        }
+    }
+
+    void nova_renderer::enable_debug() {
+        glEnable(GL_DEBUG_OUTPUT);
+        glDebugMessageCallback(debug_logger, nullptr);
     }
 }
 
