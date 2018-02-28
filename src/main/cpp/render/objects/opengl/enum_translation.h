@@ -8,7 +8,7 @@
 #define RENDERER_ENUM_TRANSLATION_H
 
 #include <glad/glad.h>
-#include "../render_pass.h"
+#include "../material.h"
 
 namespace nova {
     /*!

@@ -6,7 +6,7 @@
 #ifndef RENDERER_RENDER_GRAPH_H
 #define RENDERER_RENDER_GRAPH_H
 
-#include "objects/render_pass.h"
+#include "objects/material.h"
 #include "objects/textures/texture_manager.h"
 
 namespace nova {
@@ -32,7 +32,7 @@ namespace nova {
      * \param passes A map from pass name to pass of all the passes to order
      * \return The names of the passes in submission order
      */
-    std::vector<std::string> order_passes(const std::unordered_map<std::string, render_pass>& passes);
+    std::vector<std::string> order_passes(const std::unordered_map<std::string, material>& passes);
 }
 
 #endif //RENDERER_RENDER_GRAPH_H

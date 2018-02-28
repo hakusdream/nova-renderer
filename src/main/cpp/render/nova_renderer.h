@@ -15,7 +15,7 @@
 #include "../input/InputHandler.h"
 #include "objects/framebuffer.h"
 #include "objects/camera.h"
-#include "objects/render_pass.h"
+#include "objects/material.h"
 #include "open_gl_context.h"
 
 namespace nova {
@@ -142,7 +142,7 @@ namespace nova {
 
         void update_gbuffer_ubos();
 
-        std::vector<render_pass> passes_list;
+        std::vector<material> passes_list;
 
         /*!
          * \brief Compiles the hash map of passes into a lit of passes in submission order
@@ -152,9 +152,9 @@ namespace nova {
          * \param passes A hash map from pass name to pass of all the active passes.
          * \return A list of the active passes in submission order
          */
-        std::vector<render_pass> compile_into_list(std::unordered_map<std::string, render_pass> passes);
+        std::vector<material> compile_into_list(std::unordered_map<std::string, material> passes);
 
-        void execute_pass(const render_pass &pass);
+        void render_material(const material &mat);
 
         void enable_state(const state_enum &state);
 

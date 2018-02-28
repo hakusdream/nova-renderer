@@ -72,7 +72,7 @@ namespace nova {
         meshes->upload_new_geometry();
 
         for(const auto& pass : passes_list) {
-            execute_pass(pass);
+            render_material(pass);
         }
 
         game_window->end_frame();
@@ -91,8 +91,8 @@ namespace nova {
 		instance = std::make_unique<nova_renderer>();
     }
 
-    void nova_renderer::execute_pass(const render_pass &pass) {
-        LOG(TRACE) << "Rendering pass " << pass.name;
+    void nova_renderer::render_material(const material &mat) {
+        LOG(TRACE) << "Rendering material " << mat.name;
 
         // Setting the default state at the start of each pass will have some performance hit, especially if there's a
         // lot of passes that use a lot of states... but from what I've seen of Bedrock materials only a couple of
@@ -100,22 +100,29 @@ namespace nova {
         // to optimize if GL calls are taking too much time
         gl_context.set_default_state();
 
-        if(pass.states) {
-            for(const auto& state : pass.states.value()) {
+        if(mat.states) {
+            for(const auto& state : mat.states.value()) {
                 enable_state(state);
             }
         }
 
-        if(pass.front_face) {
+        if(mat.front_face) {
             gl_context.set_stencil_test_enabled(true);
-            const auto& front_face_stencil = pass.front_face.value();
+            const auto& front_face_stencil = mat.front_face.value();
             set_up_stencil_test(GL_FRONT, front_face_stencil);
         }
 
-        if(pass.back_face) {
+        if(mat.back_face) {
             gl_context.set_stencil_test_enabled(true);
-            const auto& back_face_stencil = pass.back_face.value();
+            const auto& back_face_stencil = mat.back_face.value();
             set_up_stencil_test(GL_BACK, back_face_stencil);
+        }
+
+        if(mat.input_textures) {
+            for(const auto& texture_binding : mat.input_textures.value()) {
+                const auto& texture = textures->get_texture(texture_binding.name);
+                gl_context.bind_texture(texture, texture_binding.binding);
+            }
         }
     }
 
@@ -380,9 +387,9 @@ namespace nova {
         return player_camera;
     }
 
-    std::vector<render_pass> nova_renderer::compile_into_list(std::unordered_map<std::string, render_pass> passes) {
+    std::vector<material> nova_renderer::compile_into_list(std::unordered_map<std::string, material> passes) {
         auto passes_dependency_order = order_passes(passes);
-        auto ordered_passes = std::vector<render_pass>{};
+        auto ordered_passes = std::vector<material>{};
 
         for(const auto& pass_name : passes_dependency_order) {
             ordered_passes.push_back(passes[pass_name]);

@@ -24,12 +24,12 @@ namespace nova {
      * passes, there's a circular dependency somewhere in the render graph. This is Bad and we hate it
      */
     void add_dependent_passes(const std::string &pass_name,
-                              const std::unordered_map<std::string, render_pass>& passes,
+                              const std::unordered_map<std::string, material>& passes,
                               const std::vector<std::string>& ordered_passes,
                               const std::unordered_map<std::string, std::vector<std::string>>& resource_to_write_pass,
                               uint32_t depth);
 
-    std::vector<std::string> order_passes(std::unordered_map<std::string, render_pass> passes) {
+    std::vector<std::string> order_passes(std::unordered_map<std::string, material> passes) {
         auto ordered_passes = std::vector<std::string>{};
 
         /*
@@ -93,7 +93,7 @@ namespace nova {
     }
 
     void add_dependent_passes(const std::string &pass_name,
-                              const std::unordered_map<std::string, render_pass>& passes,
+                              const std::unordered_map<std::string, material>& passes,
                               const std::vector<std::string>& ordered_passes,
                               const std::unordered_map<std::string, std::vector<std::string>>& resource_to_write_pass,
                               const uint32_t depth) {

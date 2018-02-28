@@ -3,8 +3,8 @@
  * \date 21-Feb-18.
  */
 
-#ifndef RENDERER_MATERIAL_STATE_H
-#define RENDERER_MATERIAL_STATE_H
+#ifndef RENDERER_material_H
+#define RENDERER_material_H
 
 #include "../../3rdparty/optional/optional.hpp"
 #include "../../3rdparty/json/src/json.hpp"
@@ -391,10 +391,6 @@ namespace nova {
      * \brief A pass over the scene
      *
      * A pass has a few things:
-     * - A geometry_filter that determines what this pass renders
-     * - Rasterizer state, like how to perform the depth and stencil test
-     * - Blending state
-     * - What shaders to use
      * - What passes MUST be executed before this one
      * - What inputs this pass's shaders have
      *      - What uniform buffers to use
@@ -409,21 +405,56 @@ namespace nova {
      * change per frame, a UBO for per-model data like the model matrix, and the virtual texture atlases. The default
      * resources.json file sets up sizteen framebuffer color attachments for ping-pong buffers, a depth attachment,
      * some shadow maps, etc
-     *
-     * When a pass has its values filled in from a parent, each field that is not present in the child material is taken
-     * straight from the parent, and each field that is present in the child is not changed. That is to say, vectors
-     * are NOT combined between the child and parent
      */
-    struct render_pass {
+    struct render_past {
         /*!
-         * \brief The name of this material_state
+         * \brief The name of thie render pass
          */
         std::string name;
 
         /*!
-         * \brief The material_state that this material_state inherits from
+         * \brief The materials that MUST execute before this one
+         */
+        optional<std::vector<std::string>> dependencies;
+
+        /*!
+         * \brief The textures that this pass will read from
+         */
+        optional<std::vector<std::string>> texture_inputs;
+        /*!
+         * \brief The textures that this pass will write to
+         */
+        optional<std::vector<std::string>> texture_outputs;
+    };
+
+    /*!
+     * \brief A material that can render certain groups of geometry
+     *
+     * A material has a few things:
+     * - A geometry_filter that determines what this pass renders
+     * - Rasterizer state, like how to perform the depth and stencil test
+     * - Blending state
+     * - What shaders to use
+     *
+     * When a material has its values filled in from a parent, each field that is not present in the child material is 
+     * taken straight from the parent, and each field that is present in the child is not changed. That is to say, 
+     * vectors are NOT combined between the child and parent
+     */
+    struct material {
+        /*!
+         * \brief The name of this material
+         */
+        std::string name;
+
+        /*!
+         * \brief The name of the pass that this material belongs to
+         */
+        std::optional<std::string> pass;
+
+        /*!
+         * \brief The material that this material inherits from
          *
-         * I may or may not make this a pointer to another material_state. Depends on how the code ends up being
+         * I may or may not make this a pointer to another material. Depends on how the code ends up being
          */
         optional<std::string> parent_name;
 
@@ -495,17 +526,22 @@ namespace nova {
         optional<stencil_op_state> back_face;
 
         /*!
-         * \brief All the textures that this material state uses
+         * \brief All the textures that this material reads from
          */
         optional<std::vector<bound_resource>> input_textures;
 
         /*!
-         * \brief The filter string used to get data for this material_state
+         * \brief All the textures that this material writes to
+         */
+        optional<std::vector<bound_resource>> output_textures;
+
+        /*!
+         * \brief The filter string used to get data for this material
          */
         optional<std::string> filters;
 
         /*!
-         * \brief The material_state to use if this one's shaders can't be found
+         * \brief The material to use if this one's shaders can't be found
          */
         optional<std::string> fallback;
 
@@ -576,20 +612,6 @@ namespace nova {
          */
         optional<render_queue_enum> render_queue;
 
-        /*!
-         * \brief The materials that MUST execute before this one
-         */
-        optional<std::vector<std::string>> dependencies;
-
-        /*!
-         * \brief The textures that this pass will read from
-         */
-        optional<std::vector<std::string>> texture_inputs;
-        /*!
-         * \brief The textures that this pass will write to
-         */
-        optional<std::vector<std::string>> texture_outputs;
-
         std::shared_ptr<gl_shader_program> program;
 
         /*!
@@ -602,9 +624,9 @@ namespace nova {
          * \param parent_pass_name The name of the pass that this pass inherits from
          * \param pass_json The JSON that this pass will be created from
          */
-        render_pass(const std::string& pass_name, const optional<std::string>& parent_pass_name, const nlohmann::json& pass_json);
+        material(const std::string& pass_name, const optional<std::string>& parent_pass_name, const nlohmann::json& pass_json);
 
-        render_pass() = default;
+        material() = default;
     };
 
     /*!
@@ -622,4 +644,4 @@ namespace nova {
 }
 
 
-#endif //RENDERER_MATERIAL_STATE_H
+#endif //RENDERER_material_H

@@ -12,7 +12,7 @@
 
 #include <string>
 #include <unordered_map>
-#include "../../render/objects/render_pass.h"
+#include "../../render/objects/material.h"
 
 namespace nova {
     /*!
@@ -21,7 +21,7 @@ namespace nova {
      * \param shaderpack_name The name of the shaderpack to load
      * \return The loaded shaderpack
      */
-    std::unordered_map<std::string, render_pass> load_shaderpack(const std::string &shaderpack_name);
+    std::unordered_map<std::string, material> load_shaderpack(const std::string &shaderpack_name);
 }
 
 #endif //RENDERER_LOADERS_H
