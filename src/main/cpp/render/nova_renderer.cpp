@@ -7,6 +7,7 @@
 #include "../data_loading/loaders/loaders.h"
 #include "../utils/profiler.h"
 #include "render_graph.h"
+#include "objects/opengl/enum_translation.h"
 
 #include <easylogging++.h>
 #include <glm/gtc/matrix_transform.hpp>
@@ -104,6 +105,51 @@ namespace nova {
                 enable_state(state);
             }
         }
+
+        if(pass.front_face) {
+            gl_context.set_stencil_test_enabled(true);
+            const auto& front_face_stencil = pass.front_face.value();
+            set_up_stencil_test(GL_FRONT, front_face_stencil);
+        }
+
+        if(pass.back_face) {
+            gl_context.set_stencil_test_enabled(true);
+            const auto& back_face_stencil = pass.back_face.value();
+            set_up_stencil_test(GL_BACK, back_face_stencil);
+        }
+    }
+
+    void nova_renderer::set_up_stencil_test(const GLenum face, const stencil_op_state &front_face_stencil) {
+        auto fail_op = GL_KEEP;
+        auto pass_op = GL_KEEP;
+        auto depth_fail_op = GL_KEEP;
+
+        if(front_face_stencil.fail_op) {
+                fail_op = stencil_op_to_gl(front_face_stencil.fail_op.value());
+            }
+        if(front_face_stencil.pass_op) {
+                pass_op = stencil_op_to_gl(front_face_stencil.pass_op.value());
+            }
+        if(front_face_stencil.depth_fail_op) {
+                depth_fail_op = stencil_op_to_gl(front_face_stencil.depth_fail_op.value());
+            }
+
+        gl_context.set_stencil_op_separate(face, fail_op, pass_op, depth_fail_op);
+
+        auto compare_op = GL_ALWAYS;
+        auto stencil_mask = 0xFF;
+
+        if(front_face_stencil.compare_op) {
+                compare_op = compare_op_to_gl(front_face_stencil.compare_op.value());
+            }
+        if(front_face_stencil.compare_mask) {
+                stencil_mask &= front_face_stencil.compare_mask.value();
+            }
+        if(front_face_stencil.write_mask) {
+                stencil_mask &= front_face_stencil.write_mask.value();
+            }
+
+        gl_context.set_stencil_func_separate(face, compare_op, 0, stencil_mask);
     }
 
     void nova_renderer::enable_state(const state_enum &state) {
@@ -112,7 +158,6 @@ namespace nova {
                 gl_context.set_blending_enabled(true);
                 break;
             case state_enum::InvertCuling:
-                gl_context.set_culling_enabled(true);
                 gl_context.set_culling_mode(GL_FRONT);
                 break;
             case state_enum::DisableCulling:

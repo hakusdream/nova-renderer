@@ -356,16 +356,6 @@ namespace nova {
         std::string name;
 
         /*!
-         * \brief Where to bind the texture
-         *
-         * For input textures, this is the texture unit to bind the texture to. For output textures, this is the
-         * framebuffer attachment to attach this texture to
-         *
-         * Binding a single texture as both an input and output is an error
-         */
-        uint32_t binding;
-
-        /*!
          * \brief The format of the texture
          */
         texture_format_enum format;
@@ -378,6 +368,23 @@ namespace nova {
          * \brief The height, in pixels, of the texture
          */
         uint32_t height;
+    };
+
+    struct bound_resource {
+        /*!
+         * \brief The name of the resource
+         */
+        std::string name;
+
+        /*!
+         * \brief Where to bind the resource
+         *
+         * For input textures, this is the texture binding unit to use
+         * For input buffers, the is the uniform location of the buffer
+         *
+         * For output textures, this is the framebuffer attachment slot to use
+         */
+        uint32_t binding;
     };
 
     /*!
@@ -488,14 +495,9 @@ namespace nova {
         optional<stencil_op_state> back_face;
 
         /*!
-         * \brief All the sampler states that are defined for this material_state. Still not sure how they work though
-         */
-        optional<std::vector<sampler_state>> sampler_states;
-
-        /*!
          * \brief All the textures that this material state uses
          */
-        optional<std::vector<texture>> textures;
+        optional<std::vector<bound_resource>> input_textures;
 
         /*!
          * \brief The filter string used to get data for this material_state

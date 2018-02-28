@@ -157,6 +157,8 @@ namespace nova {
         void execute_pass(const render_pass &pass);
 
         void enable_state(const state_enum &state);
+
+        void set_up_stencil_test(const GLenum face, const stencil_op_state &front_face_stencil);
     };
 
     void link_up_uniform_buffers(std::unordered_map<std::string, gl_shader_program> &shaders, uniform_buffer_store &ubos);

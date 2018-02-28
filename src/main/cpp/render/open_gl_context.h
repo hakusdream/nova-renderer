@@ -92,6 +92,10 @@ namespace nova {
          * \param enabled If true, alpha to coverage is enabled. If false, it is not
          */
         void set_alpha_write_enabled(bool enabled);
+
+        void set_stencil_op_separate(int face, int fail_op, int pass_op, int depth_fail_op);
+
+        void set_stencil_func_separate(int face, int compare_op, int reference, int mask);
     };
 }
 
