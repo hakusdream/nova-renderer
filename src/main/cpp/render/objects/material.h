@@ -406,7 +406,7 @@ namespace nova {
      * resources.json file sets up sizteen framebuffer color attachments for ping-pong buffers, a depth attachment,
      * some shadow maps, etc
      */
-    struct render_past {
+    struct render_pass {
         /*!
          * \brief The name of thie render pass
          */

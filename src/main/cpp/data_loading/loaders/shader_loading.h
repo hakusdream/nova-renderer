@@ -20,6 +20,32 @@ namespace fs = std::experimental::filesystem;
 
 namespace nova {
     /*!
+     * \brief A shaderpack loaded from disk
+     *
+     * A shaderpack has
+     * - A list of render passes. Render passes have:
+     *      - The dynamic resources that this pass needs as an input
+     *      - The dynamic resources that this pass writes to
+     * - A list of materials. A material has
+     *      - A fragment shader and vertex shader, and optionally a geometry shader and tessellation shader
+     *      - All sorts of renderer state like depth test, stencil test, etc
+     *      - The textures and UBOs the shader uses, and what location to bind them to
+     *      - The textures in the framebuffer that this shader writes to, and where to bind them
+     *      - The name of the pass that should render this material
+     *      - A filter that selects geometry that this shader renders
+     * - A list of dynamic resources. A dynamic resource is a texture or buffer that is written to by a shader. Nova 1
+     *  only supports textures (unless that changes). A dynamic texture has:
+     *      - A name
+     *      - A resolution (relative to the screen, or in absolute pixels)
+     *      - A format
+     */
+    struct shaderpack {
+        std::unordered_map<std::string, material> materials_by_pass;
+        std::vector<render_pass> ordered_passes;
+        std::unordered_map<std::string, texture_resource> textures;
+    };
+
+    /*!
      * \brief Loads all the passes that are present in the shaderpack with the given zip file name
      *
      * \param shaderpack_name The name of the shaderpack file to load things from
