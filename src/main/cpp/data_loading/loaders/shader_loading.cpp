@@ -15,59 +15,7 @@
 #include "../../utils/utils.h"
 
 namespace nova {
-    // TODO: Fill this in
-    std::vector<fs::path> bedrock_filenames = {};
-
-    std::vector<fs::path> optifine_filenames = {
-            fs::path("gbuffers_basic"),
-            fs::path("gbuffers_textured"),
-            fs::path("gbuffers_textured_lit"),
-            fs::path("gbuffers_skybasic"),
-            fs::path("gbuffers_skytextured"),
-            fs::path("gbuffers_clouds"),
-            fs::path("gbuffers_terrain"),
-            fs::path("gbuffers_terrain_solid"),
-            fs::path("gbuffers_terrain_cutout_mip"),
-            fs::path("gbuffers_terrain_cutout"),
-            fs::path("gbuffers_damagedblock"),
-            fs::path("gbuffers_water"),
-            fs::path("gbuffers_block"),
-            fs::path("gbuffers_beaconbeam"),
-            fs::path("gbuffers_item"),
-            fs::path("gbuffers_entities"),
-            fs::path("gbuffers_armor_glint"),
-            fs::path("gbuffers_spidereyes"),
-            fs::path("gbuffers_hand"),
-            fs::path("gbuffers_weather"),
-            fs::path("composite"),
-            fs::path("composite1"),
-            fs::path("composite2"),
-            fs::path("composite3"),
-            fs::path("composite4"),
-            fs::path("composite5"),
-            fs::path("composite6"),
-            fs::path("composite7"),
-            fs::path("final"),
-            fs::path("shadow"),
-            fs::path("shadow_solid"),
-            fs::path("shadow_cutout"),
-            fs::path("deferred"),
-            fs::path("deferred1"),
-            fs::path("deferred2"),
-            fs::path("deferred3"),
-            fs::path("deferred4"),
-            fs::path("deferred5"),
-            fs::path("deferred6"),
-            fs::path("deferred7"),
-            fs::path("gbuffers_hand_water"),
-            fs::path("deferred_last"),
-            fs::path("composite_last"),
-    };
-
-    bool contains_bedrock_files(std::vector<filesystem::path> &files);
-    bool contains_optifine_files(std::vector<filesystem::path> &files);
-
-    std::unordered_map<std::string, material> load_shaderpack(const std::string &shaderpack_name) {
+    shaderpack load_shaderpack(const std::string &shaderpack_name) {
         // Load the passes
         //  - Check if there's passes in the shaderpack
         //  - If so, identify if there are a complete set of passes
@@ -89,6 +37,7 @@ namespace nova {
         //          make the user chose something else
 
         LOG(INFO) << "Loading shaderpack " << shaderpack_name;
+        auto pack = shaderpack{};
 
         if(is_zip_file(shaderpack_name)) {
             LOG(TRACE) << "Loading shaderpack " << shaderpack_name << " from a zip file";
@@ -102,58 +51,10 @@ namespace nova {
 
             auto shaderpack_directory = fs::path("shaderpacks") / shaderpack_name;
 
-            std::unordered_map<std::string, material> passes = load_passes_from_folder(shaderpack_directory);
-            if(passes.empty()) {
-                LOG(WARNING) << "No passes defines by shaderpack " << shaderpack_name << ". Attempting to guess the intended shaderpack format";
-
-                auto files = get_shader_names_in_folder(shaderpack_directory / "shaders");
-
-                if(contains_bedrock_files(files)) {
-                    passes = parse_passes_from_json(get_default_bedrock_passes());
-
-                } else if(contains_optifine_files(files)) {
-                    passes = parse_passes_from_json(get_default_optifine_passes());
-
-                } else {
-                    LOG(FATAL) << "Cannot work with the format of this shaderpack. Please chose another one and try again";
-                }
-            } else {
-                // TODO: Try to identify if the passes have at least one pass that matches either the default Bedrock
-                // TODO: or Optifine setup
-                // Right now I'm not dealing with that
-            }
-
-            LOG(INFO) << "Reading shaders from disk";
-            auto sources = load_sources_from_folder(shaderpack_directory, passes);
-
-            LOG(INFO) << "Compiling shaders";
-            for(auto& named_pass : passes) {
-                // TODO: Multithreaded shader compilation
-                named_pass.second.program = std::make_shared<gl_shader_program>(sources[named_pass.first]);
-
-                glObjectLabel(GL_PROGRAM, named_pass.second.program->gl_name, named_pass.first.size(), named_pass.first.c_str());
-            }
-
-            return passes;
+            pack.materials_by_pass = load_materials_from_folder(shaderpack_directory);
         }
-    }
 
-    bool contains_bedrock_files(std::vector<filesystem::path> &files) {
-        for(const auto &bedrock_name : bedrock_filenames) {
-            if(find(files.begin(), files.end(), bedrock_name) != files.end()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    bool contains_optifine_files(std::vector<filesystem::path> &files) {
-        for(const auto& bedrock_name : bedrock_filenames) {
-            if(find(files.begin(), files.end(), bedrock_name) != files.end()) {
-                return true;
-            }
-        }
-        return false;
+        return pack;
     }
 
     template<typename Type>
@@ -183,7 +84,7 @@ namespace nova {
         fill_in_material_state_field<Type>(name, materials, [ptr](material& s) -> optional<Type>&{ return s.*ptr; });
     }
 
-    std::unordered_map<std::string, material> parse_passes_from_json(const nlohmann::json &shaders_json) {
+    std::vector<material> parse_passes_from_json(const nlohmann::json &shaders_json) {
         std::unordered_map<std::string, material> definition_map;
         for(auto itr = shaders_json.begin(); itr != shaders_json.end(); ++itr) {
             auto material_state_name = itr.key();
@@ -202,10 +103,12 @@ namespace nova {
             LOG(TRACE) << "Inserted a material named " << material_state_name;
         }
 
+        auto materials = std::vector<material>{};
+
         // I don't really know the O(n) for this thing. It's at least O(n) and probs O(nlogn) but someone mathy can
         // figure it out
         for(const auto& item : definition_map) {
-            auto& cur_state = item.second;
+            auto &cur_state = item.second;
 
             if(!cur_state.parent_name) {
                 // No parent? I guess we get what we have then
@@ -243,10 +146,12 @@ namespace nova {
             fill_field(item.first, definition_map, &material::texture_inputs);
             fill_field(item.first, definition_map, &material::texture_outputs);
 
-            LOG(TRACE) << "Filed in all fields on material " << cur_state.name;
+            LOG(TRACE) << "Filled in all fields on material " << cur_state.name;
+
+            materials.push_back(cur_state);
         }
 
-        return definition_map;
+        return materials;
     }
 
 

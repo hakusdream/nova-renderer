@@ -71,9 +71,11 @@ namespace nova {
      * \param shaderpack_path The name of the shaderpack folder to load things from
      * \return A map from pass name to pass of all the passes found in that folder
      */
-    std::unordered_map<std::string, material> load_passes_from_folder(const fs::path& shaderpack_path);
+    std::unordered_map<std::string, material> load_materials_from_folder(const fs::path &shaderpack_path);
 
-    std::unordered_map<std::string, material> parse_passes_from_json(const nlohmann::json &shaders_json);
+    std::vector<material> read_material_files(const fs::path& shaderpack_path);
+
+    std::vector<material> parse_passes_from_json(const nlohmann::json &shaders_json);
 
     /*!
      * \brief Gets a list of all the files in the given folder
@@ -93,7 +95,7 @@ namespace nova {
      * \param passes The list of names of shaders to load
      * \return The loaded shaderpack
      */
-    std::unordered_map<std::string, shader_definition> load_sources_from_folder(const fs::path &shaderpack_name, const std::unordered_map<std::string, material> &passes);
+    std::unordered_map<std::string, shader_definition> load_sources_from_folder(const fs::path &shaderpack_name, const std::vector<material> &passes);
 
     /*!
      * \brief Extracts the filename from the #include line
