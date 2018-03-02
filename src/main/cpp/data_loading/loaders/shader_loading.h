@@ -41,8 +41,8 @@ namespace nova {
      */
     struct shaderpack {
         std::unordered_map<std::string, material> materials_by_pass;
-        std::vector<render_pass> ordered_passes;
-        std::unordered_map<std::string, texture_resource> textures;
+        std::unordered_map<std::string, render_pass> passes;
+        std::unordered_map<std::string, texture_resource> dynamic_textures;
     };
 
     /*!
