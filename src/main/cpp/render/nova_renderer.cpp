@@ -237,7 +237,6 @@ namespace nova {
         return *meshes;
     }
 
-
     std::vector<material *> nova_renderer::get_all_materials() {
         auto materials = std::vector<const material *>{};
         for(const auto& item : materials_by_pass) {

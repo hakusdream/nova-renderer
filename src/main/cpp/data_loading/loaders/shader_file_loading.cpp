@@ -194,7 +194,7 @@ namespace nova {
             // std::path's stream insertion operator adds double quotes. yay. I'm so glad the std authors made
             // filesystem so straightforward to use
             auto stringpath = ss.str().substr(1);
-            stringpath = ss.str().substr(0, stringpath.size() - 1);
+            stringpath = stringpath.substr(0, stringpath.size() - 1);
 
             auto stream = std::ifstream(stringpath);
             auto materials_json = load_json_from_stream(stream);
@@ -354,4 +354,28 @@ namespace nova {
         }
         return false;
     }
+
+    std::unordered_map<std::string, render_pass> load_passes_from_folder(const fs::path& shaderpack_path) {
+        auto passes_path = shaderpack_path / "passes.json";
+        auto ss = std::stringstream{};
+        ss << passes_path;
+        auto stringpath = ss.str().substr(1);
+        stringpath = stringpath.substr(0, stringpath.size() - 1);
+        auto passes_stream = std::ifstream{stringpath};
+        auto passes_json = load_json_from_stream(passes_stream);
+
+        return parse_passes_from_json(passes_json);
+    };
+
+    std::unordered_map<std::string, texture_resource> load_texture_definitions_from_folder(const fs::path& shaderpack_path) {
+        auto resources_path = shaderpack_path / "resoruces.json";
+        auto ss = std::stringstream{};
+        ss << resources_path;
+        auto stringpath = ss.str().substr(1);
+        stringpath = stringpath.substr(0, stringpath.size() - 1);
+        auto resoruces_stream = std::ifstream{stringpath};
+        auto resoruces_json = load_json_from_stream(resoruces_stream);
+
+        return parse_textures_from_json(resoruces_json);
+    };
 }

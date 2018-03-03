@@ -66,12 +66,24 @@ namespace nova {
     std::unordered_map<std::string, shader_definition> load_sources_from_zip_file(const std::string &shaderpack_name, const std::vector<std::string> &shader_names);
 
     /*!
-     * \brief Loads all the passes that are present in the shaderpack with the given folder name
+     * \brief Loads all the materials that are present in the shaderpack with the given folder name
      *
      * \param shaderpack_path The name of the shaderpack folder to load things from
-     * \return A map from pass name to pass of all the passes found in that folder
+     * \return A map from material name to list of all the materials found in that folder
      */
     std::unordered_map<std::string, std::vector<material>> load_materials_from_folder(const fs::path &shaderpack_path);
+
+    /*!
+     * \brief Loads all the passes that were defined in a given shaderpack's folder
+     *
+     * \param shaderpack_path The path to the shaderpack's folder
+     * \return A map from the name of the pass to that pass
+     */
+    std::unordered_map<std::string, render_pass> load_passes_from_folder(const fs::path& shaderpack_path);
+
+    std::unordered_map<std::string, texture_resource> load_texture_definitions_from_folder(const fs::path& shaderpack_path);
+
+    std::unordered_map<std::string, render_pass> parse_passes_from_json(const nlohmann::json& json);
 
     std::vector<material> read_material_files(const fs::path& shaderpack_path);
 

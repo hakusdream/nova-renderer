@@ -1,0 +1,109 @@
+{
+    "textures": [
+        {
+            "name": "shadow_depth0",
+            "format": "R24",
+            "dimensionType": "Absolute",
+            "width": "1024",
+            "height": "1024"
+        },
+        {
+            "name": "shadow_depth1",
+            "format": "R24",
+            "dimensionType": "Absolute",
+            "width": "1024",
+            "height": "1024"
+        },
+        {
+            "name": "shadow_color0",
+            "format": "R24",
+            "dimensionType": "Absolute",
+            "width": "1024",
+            "height": "1024"
+        },
+        {
+            "name": "shadow_color1",
+            "format": "R24",
+            "dimensionType": "Absolute",
+            "width": "1024",
+            "height": "1024"
+        },
+        {
+            "name": "gbuffers_depth0",
+            "format": "R24",
+            "dimensionType": "ScreenRelative",
+            "width": "1",
+            "height": "1"
+        },
+        {
+            "name": "gbuffers_depth1",
+            "format": "R24",
+            "dimensionType": "ScreenRelative",
+            "width": "1",
+            "height": "1"
+        },
+        {
+            "name": "gbuffers_depth2",
+            "format": "R24",
+            "dimensionType": "ScreenRelative",
+            "width": "1",
+            "height": "1"
+        },
+        {
+            "name": "gbuffers_color0",
+            "format": "RGB8",
+            "dimensionType": "ScreenRelative",
+            "width": 1,
+            "height": 1
+        },
+        {
+            "name": "gbuffers_color1",
+            "format": "RGB8",
+            "dimensionType": "ScreenRelative",
+            "width": 1,
+            "height": 1
+        },
+        {
+            "name": "gbuffers_color2",
+            "format": "RGB8",
+            "dimensionType": "ScreenRelative",
+            "width": 1,
+            "height": 1
+        },
+        {
+            "name": "gbuffers_color3",
+            "format": "RGB8",
+            "dimensionType": "ScreenRelative",
+            "width": 1,
+            "height": 1
+        },
+        {
+            "name": "gbuffers_color4",
+            "format": "RGB8",
+            "dimensionType": "ScreenRelative",
+            "width": 1,
+            "height": 1
+        },
+        {
+            "name": "gbuffers_color5",
+            "format": "RGB8",
+            "dimensionType": "ScreenRelative",
+            "width": 1,
+            "height": 1
+        },
+        {
+            "name": "gbuffers_color6",
+            "format": "RGB8",
+            "dimensionType": "ScreenRelative",
+            "width": 1,
+            "height": 1
+        },
+        {
+            "name": "gbuffers_color7",
+            "format": "RGB8",
+            "dimensionType": "ScreenRelative",
+            "width": 1,
+            "height": 1
+        }
+    ]
+}

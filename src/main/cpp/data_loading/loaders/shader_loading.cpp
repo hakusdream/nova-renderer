@@ -47,12 +47,18 @@ namespace nova {
 
         } else {
             LOG(TRACE) << "Loading shaderpack " << shaderpack_name << " from a regular folder";
-            LOG(INFO) << "Loading passes";
 
             auto shaderpack_directory = fs::path("shaderpacks") / shaderpack_name;
 
+            LOG(INFO) << "Loading materials";
             pack.materials_by_pass = load_materials_from_folder(shaderpack_directory);
+            LOG(INFO) << "Loading passes";
+            pack.passes = load_passes_from_folder(shaderpack_directory);
+            LOG(INFO) << "Loading dynamic textures";
+            pack.dynamic_textures = load_texture_definitions_from_folder(shaderpack_directory);
         }
+
+        LOG(INFO) << "All data for shaderpack " << shaderpack_name << " read from disk";
 
         return pack;
     }
@@ -152,60 +158,18 @@ namespace nova {
         return materials;
     }
 
+    std::unordered_map<std::string, render_pass> parse_passes_from_json(const nlohmann::json& json) {
+        auto passes = std::unordered_map<std::string, render_pass>{};
 
+        for(const auto& pass_json : json) {
+            auto pass_node = pass_json.value();
 
+            auto pass = render_pass(pass_node);
+            passes[pass.name] = pass;
+        }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        return passes;
+    }
 
     std::string get_filename_from_include(const std::string& include_line) {
         auto quote_pos = include_line.find('"');

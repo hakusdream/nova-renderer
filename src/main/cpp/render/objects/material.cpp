@@ -180,4 +180,29 @@ namespace nova {
 
         return ret_val;
     }
+
+    render_pass::render_pass(const nlohmann::json &pass_json) {
+        name = pass_json["name"];
+        dependencies = get_json_value<std::vector<std::string>>(pass_json, "dependencies", [&](const nlohmann::json& dependency_json) {
+            auto vec = std::vector<std::string>{};
+            for(const auto& val : dependency_json) {
+                vec.push_back(val.get<std::string>());
+            }
+            return vec;
+        });
+        texture_inputs = get_json_value<std::vector<std::string>>(pass_json, "textureInputs", [&](const nlohmann::json& texture_inputs_json) {
+            auto vec = std::vector<std::string>{};
+            for(const auto& val : texture_inputs_json) {
+                vec.push_back(val.get<std::string>());
+            }
+            return vec;
+        });
+        texture_outputs = get_json_value<std::vector<std::string>>(pass_json, "textureOutputs", [&](const nlohmann::json& texture_outputs_json) {
+            auto vec = std::vector<std::string>{};
+            for(const auto& val : texture_outputs_json) {
+                vec.push_back(val.get<std::string>());
+            }
+            return vec;
+        });
+    }
 }

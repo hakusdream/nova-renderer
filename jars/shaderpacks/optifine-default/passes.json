@@ -1,0 +1,502 @@
+[
+    {
+        "name": "shadow",
+        "texture_outputs": ["shadow_depth0", "shadow_depth1", "shadow_color0", "shadow_color1"]
+    },
+    {
+        "name": "gbuffers_solid",
+        "texture_inputs": ["shadow_depth0", "shadow_depth1", "shadow_depth2", "shadow_color0", "shadow_color1"],
+        "texture_outputs": [
+            "gbuffers_depth0", 
+            "gbuffers_depth1",
+            "gbuffers_depth2", 
+            "gbuffers_color0", 
+            "gbuffers_color1",
+            "gbuffers_color2", 
+            "gbuffers_color3", 
+            "gbuffers_color4", 
+            "gbuffers_color5", 
+            "gbuffers_color6", 
+            "gbuffers_color7"
+        ]
+    },
+    {
+        "name": "deferred0",
+        "texture_inputs": [
+            "shadow_depth0", "shadow_depth1", "shadow_depth2", "shadow_color0", "shadow_color1",
+            "gbuffers_depth0", 
+            "gbuffers_depth1",
+            "gbuffers_depth2", 
+            "gbuffers_color0", 
+            "gbuffers_color1",
+            "gbuffers_color2", 
+            "gbuffers_color3", 
+            "gbuffers_color4", 
+            "gbuffers_color5", 
+            "gbuffers_color6", 
+            "gbuffers_color7"
+        ],
+        "texture_outputs": [ 
+            "deferred1_color0", 
+            "deferred1_color1",
+            "deferred1_color2", 
+            "deferred1_color3", 
+            "deferred1_color4", 
+            "deferred1_color5", 
+            "deferred1_color6", 
+            "deferred1_color7"
+        ]
+    },
+    {
+        "name": "deferred1",
+        "texture_inputs": [
+            "shadow_depth0", "shadow_depth1", "shadow_depth2", "shadow_color0", "shadow_color1",
+            "gbuffers_depth0", 
+            "gbuffers_depth1",
+            "gbuffers_depth2", 
+            "deferred0_color0", 
+            "deferred0_color1",
+            "deferred0_color2", 
+            "deferred0_color3", 
+            "deferred0_color4", 
+            "deferred0_color5", 
+            "deferred0_color6", 
+            "deferred0_color7"
+        ],
+        "texture_outputs": [ 
+            "deferred1_color0", 
+            "deferred1_color1",
+            "deferred1_color2", 
+            "deferred1_color3", 
+            "deferred1_color4", 
+            "deferred1_color5", 
+            "deferred1_color6", 
+            "deferred1_color7"
+        ]
+    },
+    {
+        "name": "deferred2",
+        "texture_inputs": [
+            "shadow_depth0", "shadow_depth1", "shadow_depth2", "shadow_color0", "shadow_color1",
+            "gbuffers_depth0", 
+            "gbuffers_depth1",
+            "gbuffers_depth2", 
+            "deferred1_color0", 
+            "deferred1_color1",
+            "deferred1_color2", 
+            "deferred1_color3", 
+            "deferred1_color4", 
+            "deferred1_color5", 
+            "deferred1_color6", 
+            "deferred1_color7"
+        ],
+        "texture_outputs": [ 
+            "deferred2_color0", 
+            "deferred2_color1",
+            "deferred2_color2", 
+            "deferred2_color3", 
+            "deferred2_color4", 
+            "deferred2_color5", 
+            "deferred2_color6", 
+            "deferred2_color7"
+        ]
+    },
+    {
+        "name": "deferred3",
+        "texture_inputs": [
+            "shadow_depth0", "shadow_depth1", "shadow_depth2", "shadow_color0", "shadow_color1",
+            "gbuffers_depth0", 
+            "gbuffers_depth1",
+            "gbuffers_depth2", 
+            "deferred2_color0", 
+            "deferred2_color1",
+            "deferred2_color2", 
+            "deferred2_color3", 
+            "deferred2_color4", 
+            "deferred2_color5", 
+            "deferred2_color6", 
+            "deferred2_color7"
+        ],
+        "texture_outputs": [ 
+            "deferred3_color0", 
+            "deferred3_color1",
+            "deferred3_color2", 
+            "deferred3_color3", 
+            "deferred3_color4", 
+            "deferred3_color5", 
+            "deferred3_color6", 
+            "deferred3_color7"
+        ]
+    },
+    {
+        "name": "deferred4",
+        "texture_inputs": [
+            "shadow_depth0", "shadow_depth1", "shadow_depth2", "shadow_color0", "shadow_color1",
+            "gbuffers_depth0", 
+            "gbuffers_depth1",
+            "gbuffers_depth2", 
+            "deferred3_color0", 
+            "deferred3_color1",
+            "deferred3_color2", 
+            "deferred3_color3", 
+            "deferred3_color4", 
+            "deferred3_color5", 
+            "deferred3_color6", 
+            "deferred3_color7"
+        ],
+        "texture_outputs": [ 
+            "deferred4_color0", 
+            "deferred4_color1",
+            "deferred4_color2", 
+            "deferred4_color3", 
+            "deferred4_color4", 
+            "deferred4_color5", 
+            "deferred4_color6", 
+            "deferred4_color7"
+        ]
+    },
+    {
+        "name": "deferred5",
+        "texture_inputs": [
+            "shadow_depth0", "shadow_depth1", "shadow_depth2", "shadow_color0", "shadow_color1",
+            "gbuffers_depth0", 
+            "gbuffers_depth1",
+            "gbuffers_depth2", 
+            "deferred4_color0", 
+            "deferred4_color1",
+            "deferred4_color2", 
+            "deferred4_color3", 
+            "deferred4_color4", 
+            "deferred4_color5", 
+            "deferred4_color6", 
+            "deferred4_color7"
+        ],
+        "texture_outputs": [ 
+            "deferred5_color0", 
+            "deferred5_color1",
+            "deferred5_color2", 
+            "deferred5_color3", 
+            "deferred5_color4", 
+            "deferred5_color5", 
+            "deferred5_color6", 
+            "deferred5_color7"
+        ]
+    },
+    {
+        "name": "deferred6",
+        "texture_inputs": [
+            "shadow_depth0", "shadow_depth1", "shadow_depth2", "shadow_color0", "shadow_color1",
+            "gbuffers_depth0", 
+            "gbuffers_depth1",
+            "gbuffers_depth2", 
+            "deferred5_color0", 
+            "deferred5_color1",
+            "deferred5_color2", 
+            "deferred5_color3", 
+            "deferred5_color4", 
+            "deferred5_color5", 
+            "deferred5_color6", 
+            "deferred5_color7"
+        ],
+        "texture_outputs": [ 
+            "deferred6_color0", 
+            "deferred6_color1",
+            "deferred6_color2", 
+            "deferred6_color3", 
+            "deferred6_color4", 
+            "deferred6_color5", 
+            "deferred6_color6", 
+            "deferred6_color7"
+        ]
+    },
+    {
+        "name": "deferred7",
+        "texture_inputs": [
+            "shadow_depth0", "shadow_depth1", "shadow_depth2", "shadow_color0", "shadow_color1",
+            "gbuffers_depth0", 
+            "gbuffers_depth1",
+            "gbuffers_depth2", 
+            "deferred6_color0", 
+            "deferred6_color1",
+            "deferred6_color2", 
+            "deferred6_color3", 
+            "deferred6_color4", 
+            "deferred6_color5", 
+            "deferred6_color6", 
+            "deferred6_color7"
+        ],
+        "texture_outputs": [ 
+            "deferred7_color0", 
+            "deferred7_color1",
+            "deferred7_color2", 
+            "deferred7_color3", 
+            "deferred7_color4", 
+            "deferred7_color5", 
+            "deferred7_color6", 
+            "deferred7_color7"
+        ]
+    },
+    {
+        "name": "gbuffers_transparent",
+        "texture_inputs": [
+            "shadow_depth0", "shadow_depth1", "shadow_depth2", "shadow_color0", "shadow_color1",
+            "gbuffers_depth0", 
+            "gbuffers_depth1",
+            "gbuffers_depth2", 
+            "deferred7_color0", 
+            "deferred7_color1",
+            "deferred7_color2", 
+            "deferred7_color3", 
+            "deferred7_color4", 
+            "deferred7_color5", 
+            "deferred7_color6", 
+            "deferred7_color7"
+        ],
+        "texture_outputs": [ 
+            "gbuffers_transparent_color0", 
+            "gbuffers_transparent_color1",
+            "gbuffers_transparent_color2", 
+            "gbuffers_transparent_color3", 
+            "gbuffers_transparent_color4", 
+            "gbuffers_transparent_color5", 
+            "gbuffers_transparent_color6", 
+            "gbuffers_transparent_color7"
+        ]
+    },
+    {
+        "name": "composite0",
+        "texture_inputs": [
+            "shadow_depth0", "shadow_depth1", "shadow_depth2", "shadow_color0", "shadow_color1",
+            "gbuffers_depth0", 
+            "gbuffers_depth1",
+            "gbuffers_depth2", 
+            "gbuffers_color0", 
+            "gbuffers_color1",
+            "gbuffers_color2", 
+            "gbuffers_color3", 
+            "gbuffers_color4", 
+            "gbuffers_color5", 
+            "gbuffers_color6", 
+            "gbuffers_color7"
+        ],
+        "texture_outputs": [ 
+            "composite0_color0", 
+            "composite0_color1",
+            "composite0_color2", 
+            "composite0_color3", 
+            "composite0_color4", 
+            "composite0_color5", 
+            "composite0_color6", 
+            "composite0_color7"
+        ]
+    },
+    {
+        "name": "composite1",
+        "texture_inputs": [
+            "shadow_depth0", "shadow_depth1", "shadow_depth2", "shadow_color0", "shadow_color1",
+            "gbuffers_depth0", 
+            "gbuffers_depth1",
+            "gbuffers_depth2", 
+            "composite0_color0", 
+            "composite0_color1",
+            "composite0_color2", 
+            "composite0_color3", 
+            "composite0_color4", 
+            "composite0_color5", 
+            "composite0_color6", 
+            "composite0_color7"
+        ],
+        "texture_outputs": [ 
+            "composite1_color0", 
+            "composite1_color1",
+            "composite1_color2", 
+            "composite1_color3", 
+            "composite1_color4", 
+            "composite1_color5", 
+            "composite1_color6", 
+            "composite1_color7"
+        ]
+    },
+    {
+        "name": "composite2",
+        "texture_inputs": [
+            "shadow_depth0", "shadow_depth1", "shadow_depth2", "shadow_color0", "shadow_color1",
+            "gbuffers_depth0", 
+            "gbuffers_depth1",
+            "gbuffers_depth2", 
+            "composite1_color0", 
+            "composite1_color1",
+            "composite1_color2", 
+            "composite1_color3", 
+            "composite1_color4", 
+            "composite1_color5", 
+            "composite1_color6", 
+            "composite1_color7"
+        ],
+        "texture_outputs": [ 
+            "composite2_color0", 
+            "composite2_color1",
+            "composite2_color2", 
+            "composite2_color3", 
+            "composite2_color4", 
+            "composite2_color5", 
+            "composite2_color6", 
+            "composite2_color7"
+        ]
+    },
+    {
+        "name": "composite3",
+        "texture_inputs": [
+            "shadow_depth0", "shadow_depth1", "shadow_depth2", "shadow_color0", "shadow_color1",
+            "gbuffers_depth0", 
+            "gbuffers_depth1",
+            "gbuffers_depth2", 
+            "composite2_color0", 
+            "composite2_color1",
+            "composite2_color2", 
+            "composite2_color3", 
+            "composite2_color4", 
+            "composite2_color5", 
+            "composite2_color6", 
+            "composite2_color7"
+        ],
+        "texture_outputs": [ 
+            "composite3_color0", 
+            "composite3_color1",
+            "composite3_color2", 
+            "composite3_color3", 
+            "composite3_color4", 
+            "composite3_color5", 
+            "composite3_color6", 
+            "composite3_color7"
+        ]
+    },
+    {
+        "name": "composite4",
+        "texture_inputs": [
+            "shadow_depth0", "shadow_depth1", "shadow_depth2", "shadow_color0", "shadow_color1",
+            "gbuffers_depth0", 
+            "gbuffers_depth1",
+            "gbuffers_depth2", 
+            "composite3_color0", 
+            "composite3_color1",
+            "composite3_color2", 
+            "composite3_color3", 
+            "composite3_color4", 
+            "composite3_color5", 
+            "composite3_color6", 
+            "composite3_color7"
+        ],
+        "texture_outputs": [ 
+            "composite4_color0", 
+            "composite4_color1",
+            "composite4_color2", 
+            "composite4_color3", 
+            "composite4_color4", 
+            "composite4_color5", 
+            "composite4_color6", 
+            "composite4_color7"
+        ]
+    },
+    {
+        "name": "composite5",
+        "texture_inputs": [
+            "shadow_depth0", "shadow_depth1", "shadow_depth2", "shadow_color0", "shadow_color1",
+            "gbuffers_depth0", 
+            "gbuffers_depth1",
+            "gbuffers_depth2", 
+            "composite4_color0", 
+            "composite4_color1",
+            "composite4_color2", 
+            "composite4_color3", 
+            "composite4_color4", 
+            "composite4_color5", 
+            "composite4_color6", 
+            "composite4_color7"
+        ],
+        "texture_outputs": [ 
+            "composite5_color0", 
+            "composite5_color1",
+            "composite5_color2", 
+            "composite5_color3", 
+            "composite5_color4", 
+            "composite5_color5", 
+            "composite5_color6", 
+            "composite5_color7"
+        ]
+    },
+    {
+        "name": "composite6",
+        "texture_inputs": [
+            "shadow_depth0", "shadow_depth1", "shadow_depth2", "shadow_color0", "shadow_color1",
+            "gbuffers_depth0", 
+            "gbuffers_depth1",
+            "gbuffers_depth2", 
+            "composite5_color0", 
+            "composite5_color1",
+            "composite5_color2", 
+            "composite5_color3", 
+            "composite5_color4", 
+            "composite5_color5", 
+            "composite5_color6", 
+            "composite5_color7"
+        ],
+        "texture_outputs": [ 
+            "composite6_color0", 
+            "composite6_color1",
+            "composite6_color2", 
+            "composite6_color3", 
+            "composite6_color4", 
+            "composite6_color5", 
+            "composite6_color6", 
+            "composite6_color7"
+        ]
+    },
+    {
+        "name": "composite7",
+        "texture_inputs": [
+            "shadow_depth0", "shadow_depth1", "shadow_depth2", "shadow_color0", "shadow_color1",
+            "gbuffers_depth0", 
+            "gbuffers_depth1",
+            "gbuffers_depth2", 
+            "composite6_color0", 
+            "composite6_color1",
+            "composite6_color2", 
+            "composite6_color3", 
+            "composite6_color4", 
+            "composite6_color5", 
+            "composite6_color6", 
+            "composite6_color7"
+        ],
+        "texture_outputs": [ 
+            "composite7_color0", 
+            "composite7_color1",
+            "composite7_color2", 
+            "composite7_color3", 
+            "composite7_color4", 
+            "composite7_color5", 
+            "composite7_color6", 
+            "composite7_color7"
+        ]
+    },
+    {
+        "name": "final",
+        "texture_inputs": [
+            "shadow_depth0", "shadow_depth1", "shadow_depth2", "shadow_color0", "shadow_color1",
+            "gbuffers_depth0", 
+            "gbuffers_depth1",
+            "gbuffers_depth2", 
+            "composite7_color0", 
+            "composite7_color1",
+            "composite7_color2", 
+            "composite7_color3", 
+            "composite7_color4", 
+            "composite7_color5", 
+            "composite7_color6", 
+            "composite7_color7"
+        ],
+        "texture_outputs": [ 
+            "backbuffer"
+        ]
+    }
+]

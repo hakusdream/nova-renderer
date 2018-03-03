@@ -319,6 +319,11 @@ namespace nova {
                R24
     )
 
+    SMART_ENUM(texture_dimension_type_enum
+               ScreenRelative,
+               Absolute
+    )
+
     /*!
      * \brief A texture that a pass can use
      */
@@ -361,13 +366,18 @@ namespace nova {
         texture_format_enum format;
 
         /*!
+         * \brief How to interpret the dimensions of this texture
+         */
+        texture_dimension_type_enum dimension_type;
+
+        /*!
          * \brief The width, in pixels, of the texture
          */
-        uint32_t width;
+        float width;
         /*!
          * \brief The height, in pixels, of the texture
          */
-        uint32_t height;
+        float height;
     };
 
     struct bound_resource {
@@ -425,6 +435,13 @@ namespace nova {
          * \brief The textures that this pass will write to
          */
         optional<std::vector<std::string>> texture_outputs;
+        /*!
+         * \brief Parses the provided JSON into a render pass
+         * \param pass_json The JSON object that holds this pass
+         */
+        explicit render_pass(const nlohmann::json& pass_json);
+
+        render_pass() = default;
     };
 
     /*!
