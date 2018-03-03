@@ -105,7 +105,7 @@ namespace nova {
         /*!
          * \brief Returns the OpenGL identifier used to identify this texture
          */
-        const unsigned int &get_gl_name();
+        const unsigned int &get_gl_name() const;
 
         void set_name(const std::string name);
         const std::string& get_name() const;

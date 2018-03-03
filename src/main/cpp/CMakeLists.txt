@@ -105,7 +105,6 @@ set(NOVA_HEADERS
         render/objects/render_object.h
         utils/profiler.h
 
-        render/objects/opengl/gl_render_context.h
         utils/stb_image_write.h
         render/objects/material.h
         )
@@ -148,7 +147,7 @@ set(NOVA_SOURCE
         render/objects/render_object.cpp
         utils/profiler.cpp
         render/objects/material.cpp
-        render/objects/opengl/gl_render_context.cpp data_loading/loaders/shader_file_loading.cpp render/render_graph.cpp render/render_graph.h render/open_gl_context.cpp render/open_gl_context.h render/objects/opengl/enum_translation.cpp render/objects/opengl/enum_translation.h render/objects/shaders/shaderpack.cpp render/objects/shaders/shaderpack.h)
+        data_loading/loaders/shader_file_loading.cpp render/render_graph.cpp render/render_graph.h render/objects/opengl/open_gl_context.cpp render/objects/opengl/open_gl_context.h render/objects/opengl/enum_translation.cpp render/objects/opengl/enum_translation.h render/objects/shaders/shaderpack.cpp render/objects/shaders/shaderpack.h)
 
 if (WIN32)
     set(NOVA_SOURCE ${NOVA_SOURCE} ${NOVA_HEADERS} 3rdparty/renderdocapi/RenderDocManager.cpp data_loading/loaders/shader_zip_loading.cpp)

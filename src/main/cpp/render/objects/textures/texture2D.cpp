@@ -51,7 +51,7 @@ namespace nova {
         // TODO
     }
 
-    const unsigned int &texture2D::get_gl_name() {
+    const unsigned int &texture2D::get_gl_name() const {
         return gl_name;
     }
 

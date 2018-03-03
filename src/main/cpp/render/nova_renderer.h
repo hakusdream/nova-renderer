@@ -16,7 +16,7 @@
 #include "objects/framebuffer.h"
 #include "objects/camera.h"
 #include "objects/material.h"
-#include "open_gl_context.h"
+#include "objects/opengl/open_gl_context.h"
 
 namespace nova {
     /*!
