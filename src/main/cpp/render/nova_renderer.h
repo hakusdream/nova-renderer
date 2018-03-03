@@ -89,6 +89,8 @@ namespace nova {
 
         camera& get_player_camera();
 
+        std::vector<material*> get_all_materials();
+
         // Overrides from iconfig_listener
 
         void on_config_change(nlohmann::json& new_config);
@@ -145,24 +147,24 @@ namespace nova {
 
         void update_gbuffer_ubos();
 
-        /*!
-         * \brief Compiles the hash map of passes into a lit of passes in submission order
-         *
-         * The algorithm in this method is heavily borrowed from http://themaister.net/blog/2017/08/15/render-graphs-and-vulkan-a-deep-dive/
-         *
-         * \param passes A hash map from pass name to pass of all the active passes.
-         * \return A list of the active passes in submission order
-         */
-        std::vector<render_pass> compile_into_list(std::unordered_map<std::string, render_pass> passes);
-
         void render_geometry_for_material(const material &mat);
 
         void enable_state(const state_enum &state);
 
-        void set_up_stencil_test(const GLenum face, const stencil_op_state &front_face_stencil);
+        void set_up_stencil_test(GLenum face, const stencil_op_state &front_face_stencil);
 
         void execute_pass(const render_pass &pass);
     };
+
+    /*!
+     * \brief Compiles the hash map of passes into a lit of passes in submission order
+     *
+     * The algorithm in this method is heavily borrowed from http://themaister.net/blog/2017/08/15/render-graphs-and-vulkan-a-deep-dive/
+     *
+     * \param passes A hash map from pass name to pass of all the active passes.
+     * \return A list of the active passes in submission order
+     */
+    std::vector<render_pass> compile_into_list(std::unordered_map<std::string, render_pass> passes);
 
     void link_up_uniform_buffers(std::unordered_map<std::string, gl_shader_program> &shaders, uniform_buffer_store &ubos);
 }

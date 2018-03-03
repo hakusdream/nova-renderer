@@ -131,6 +131,8 @@ namespace nova {
                 gl_context.bind_texture(texture, texture_binding.binding);
             }
         }
+
+        gl_context.commit();
     }
 
     void nova_renderer::set_up_stencil_test(const GLenum face, const stencil_op_state &front_face_stencil) {
@@ -233,6 +235,16 @@ namespace nova {
 
     mesh_store &nova_renderer::get_mesh_store() {
         return *meshes;
+    }
+
+
+    std::vector<material *> nova_renderer::get_all_materials() {
+        auto materials = std::vector<const material *>{};
+        for(const auto& item : materials_by_pass) {
+            for(const auto& mat : item.second) {
+                materials.push_back(&mat);
+            }
+        }
     }
 
     void nova_renderer::load_new_shaderpack(const std::string &new_shaderpack_name) {
@@ -394,7 +406,7 @@ namespace nova {
         return player_camera;
     }
 
-    std::vector<render_pass> nova_renderer::compile_into_list(std::unordered_map<std::string, render_pass> passes) {
+    std::vector<render_pass> compile_into_list(std::unordered_map<std::string, render_pass> passes) {
         auto passes_dependency_order = order_passes(passes);
         auto ordered_passes = std::vector<render_pass>{};
 

@@ -176,32 +176,32 @@ NOVA_API int get_num_loaded_shaders() {
 
 NOVA_API char* get_shaders_and_filters() {
     PROFILER::start("set_shaders_and_filters");
-    /*(auto& shaders = NOVA_RENDERER->get_shaders()->get_loaded_shaders();
+    auto materials = NOVA_RENDERER->get_all_materials();
 
     int num_chars = 0;
-    for(auto& s : shaders) {
-        num_chars += s.first.size();
-        num_chars += s.second.get_filter().size();
+    for(auto& mat : materials) {
+        num_chars += mat->name.size();
+        num_chars += mat->filters.value().size();
         num_chars += 2;
     }
 
     auto* filters = new char[num_chars];
     int write_pos = 0;
-    for(auto& entry : shaders) {
-        std::strcpy(&filters[write_pos], entry.first.data());
-        write_pos += entry.first.size();
+    for(auto& entry : materials) {
+        std::strcpy(&filters[write_pos], entry->name.data());
+        write_pos += entry->name.size();
 
         filters[write_pos] = '\n';
         write_pos++;
 
-        std::strcpy(&filters[write_pos], entry.second.get_filter().data());
-        write_pos += entry.second.get_filter().size();
+        std::strcpy(&filters[write_pos], entry->filters.value().data());
+        write_pos += entry->filters.value().size();
 
         filters[write_pos] = '\n';
         write_pos++;
     }
 
-    filters[num_chars - 1] = '\0';*/
+    filters[num_chars - 1] = '\0';
     PROFILER::end("set_shaders_and_filters");
-    return "";
+    return filters;
 }
