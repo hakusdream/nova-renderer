@@ -72,7 +72,7 @@ namespace nova {
         meshes->upload_new_geometry();
 
         for(const auto& pass : passes_list) {
-            render_material(pass);
+            execute_pass(pass);
         }
 
         game_window->end_frame();
@@ -91,7 +91,14 @@ namespace nova {
 		instance = std::make_unique<nova_renderer>();
     }
 
-    void nova_renderer::render_material(const material &mat) {
+    void nova_renderer::execute_pass(const render_pass &pass) {
+        const auto& materials = materials_by_pass[pass.name];
+        for(const auto& mat : materials) {
+            render_geometry_for_material(mat);
+        }
+    }
+
+    void nova_renderer::render_geometry_for_material(const material &mat) {
         LOG(TRACE) << "Rendering material " << mat.name;
 
         // Setting the default state at the start of each pass will have some performance hit, especially if there's a
@@ -244,11 +251,11 @@ namespace nova {
          * TODO: Examine shaders for rendering parameters
          */
         LOG(INFO) << "Loading shaderpack " << new_shaderpack_name << "...";
-        auto passes = load_shaderpack(new_shaderpack_name);
+        auto shaderpack = load_shaderpack(new_shaderpack_name);
 
         try {
             LOG(INFO) << "Compiling passes...";
-            passes_list = compile_into_list(passes);
+            passes_list = compile_into_list(shaderpack.passes);
         } catch(render_graph_validation_error& e) {
             LOG(ERROR) << "Could not load shaderpack " << new_shaderpack_name << ": " << e.what();
 
@@ -387,9 +394,9 @@ namespace nova {
         return player_camera;
     }
 
-    std::vector<material> nova_renderer::compile_into_list(std::unordered_map<std::string, material> passes) {
+    std::vector<render_pass> nova_renderer::compile_into_list(std::unordered_map<std::string, render_pass> passes) {
         auto passes_dependency_order = order_passes(passes);
-        auto ordered_passes = std::vector<material>{};
+        auto ordered_passes = std::vector<render_pass>{};
 
         for(const auto& pass_name : passes_dependency_order) {
             ordered_passes.push_back(passes[pass_name]);

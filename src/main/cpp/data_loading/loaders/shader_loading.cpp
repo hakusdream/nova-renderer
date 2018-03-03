@@ -15,7 +15,7 @@
 #include "../../utils/utils.h"
 
 namespace nova {
-    shaderpack load_shaderpack(const std::string &shaderpack_name) {
+    shaderpack_data load_shaderpack(const std::string &shaderpack_name) {
         // Load the passes
         //  - Check if there's passes in the shaderpack
         //  - If so, identify if there are a complete set of passes
@@ -37,7 +37,7 @@ namespace nova {
         //          make the user chose something else
 
         LOG(INFO) << "Loading shaderpack " << shaderpack_name;
-        auto pack = shaderpack{};
+        auto pack = shaderpack_data{};
 
         if(is_zip_file(shaderpack_name)) {
             LOG(TRACE) << "Loading shaderpack " << shaderpack_name << " from a zip file";
@@ -84,7 +84,7 @@ namespace nova {
         fill_in_material_state_field<Type>(name, materials, [ptr](material& s) -> optional<Type>&{ return s.*ptr; });
     }
 
-    std::vector<material> parse_passes_from_json(const nlohmann::json &shaders_json) {
+    std::vector<material> parse_materials_from_json(const nlohmann::json &shaders_json) {
         std::unordered_map<std::string, material> definition_map;
         for(auto itr = shaders_json.begin(); itr != shaders_json.end(); ++itr) {
             auto material_state_name = itr.key();
@@ -98,8 +98,8 @@ namespace nova {
                 material_state_name = material_state_name.substr(0, colon_pos);
             }
 
-            auto material = material(material_state_name, parent_state_name, json_node);
-            definition_map[material_state_name] = material;
+            auto mat = material(material_state_name, parent_state_name, json_node);
+            definition_map[material_state_name] = mat;
             LOG(TRACE) << "Inserted a material named " << material_state_name;
         }
 
@@ -115,6 +115,7 @@ namespace nova {
                 continue;
             }
 
+            fill_field(item.first, definition_map, &material::pass);
             fill_field(item.first, definition_map, &material::defines);
             fill_field(item.first, definition_map, &material::states);
             fill_field(item.first, definition_map, &material::vertex_shader);
@@ -125,8 +126,8 @@ namespace nova {
             fill_field(item.first, definition_map, &material::vertex_fields);
             fill_field(item.first, definition_map, &material::front_face);
             fill_field(item.first, definition_map, &material::back_face);
-            fill_field(item.first, definition_map, &material::sampler_states);
-            fill_field(item.first, definition_map, &material::textures);
+            fill_field(item.first, definition_map, &material::input_textures);
+            fill_field(item.first, definition_map, &material::output_textures);
             fill_field(item.first, definition_map, &material::filters);
             fill_field(item.first, definition_map, &material::fallback);
             fill_field(item.first, definition_map, &material::depth_bias);
@@ -142,9 +143,6 @@ namespace nova {
             fill_field(item.first, definition_map, &material::alpha_dst);
             fill_field(item.first, definition_map, &material::depth_func);
             fill_field(item.first, definition_map, &material::render_queue);
-            fill_field(item.first, definition_map, &material::dependencies);
-            fill_field(item.first, definition_map, &material::texture_inputs);
-            fill_field(item.first, definition_map, &material::texture_outputs);
 
             LOG(TRACE) << "Filled in all fields on material " << cur_state.name;
 

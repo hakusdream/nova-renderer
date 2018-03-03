@@ -134,7 +134,7 @@ namespace nova {
      */
     fs::path get_included_file_path(const fs::path &shader_path, const fs::path &included_file_name);
 
-    std::unordered_map<std::string, material> load_materials_from_folder(const fs::path &shaderpack_path) {
+    std::unordered_map<std::string, std::vector<material>> load_materials_from_folder(const fs::path &shaderpack_path) {
         std::vector<material> passes = read_material_files(shaderpack_path);
         if(passes.empty()) {
             LOG(WARNING) << "No passes defined by shaderpack. Attempting to guess the intended shaderpack format";
@@ -142,10 +142,10 @@ namespace nova {
             auto files = get_shader_names_in_folder(shaderpack_path / "shaders");
 
             if(contains_bedrock_files(files)) {
-                passes = parse_passes_from_json(get_default_bedrock_passes());
+                passes = parse_materials_from_json(get_default_bedrock_passes());
 
             } else if(contains_optifine_files(files)) {
-                passes = parse_passes_from_json(get_default_optifine_passes());
+                passes = parse_materials_from_json(get_default_optifine_passes());
 
             } else {
                 LOG(FATAL) << "Cannot work with the format of this shaderpack. Please chose another one and try again";
@@ -164,8 +164,16 @@ namespace nova {
             // TODO: Multithreaded shader compilation
             pass.program = std::make_shared<gl_shader_program>(sources[pass.name]);
 
-            glObjectLabel(GL_PROGRAM, pass.program->gl_name, pass.name.size(), pass.name.c_str());
+            glObjectLabel(GL_PROGRAM, pass.program->gl_name, static_cast<GLsizei>(pass.name.size()), pass.name.c_str());
         }
+
+        auto materials_by_pass = std::unordered_map<std::string, std::vector<material>>{};
+
+        for(const auto& mat : passes) {
+            materials_by_pass[mat.pass.value()].push_back(mat);
+        }
+
+        return materials_by_pass;
     }
 
     std::vector<material> read_material_files(const fs::path& shaderpack_path) {
@@ -173,7 +181,7 @@ namespace nova {
         if(materials_path.empty()) {
             return {};
         }
-        auto passes_map = std::unordered_map<std::string, material>{};
+        auto materials = std::vector<material>{};
         auto materials_itr = fs::directory_iterator(materials_path);
 
         for(const auto &item : materials_itr) {
@@ -191,11 +199,11 @@ namespace nova {
             auto stream = std::ifstream(stringpath);
             auto materials_json = load_json_from_stream(stream);
 
-            auto material_definitions = parse_passes_from_json(materials_json);
-            passes_map.insert(material_definitions.begin(), material_definitions.end());
+            auto material_definitions = parse_materials_from_json(materials_json);
+            materials.insert(materials.end(), material_definitions.begin(), material_definitions.end());
         }
 
-        return passes_map;
+        return materials;
     }
 
     std::vector<fs::path> get_shader_names_in_folder(const fs::path& shaderpack_path) {

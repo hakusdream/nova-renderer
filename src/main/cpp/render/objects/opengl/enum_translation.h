@@ -16,14 +16,14 @@ namespace nova {
      * \param op The Nova internal stencil operation to translate
      * \return The OpenGL constant that corresponds to the translated stencil op
      */
-    GLenum stencil_op_to_gl(stencil_op_enum &op);
+    GLenum stencil_op_to_gl(const stencil_op_enum &op);
 
     /*!
      * \brief Translates
      * \param op
      * \return
      */
-    GLenum compare_op_to_gl(compare_op &op);
+    GLenum compare_op_to_gl(const compare_op &op);
 }
 
 

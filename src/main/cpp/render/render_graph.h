@@ -16,7 +16,7 @@ namespace nova {
     class render_graph_validation_error : public std::exception {
     public:
         explicit render_graph_validation_error(std::string msg);
-        const char* what() const override;
+        const char* what() const noexcept override;
     private:
         std::string msg;
     };
@@ -32,7 +32,7 @@ namespace nova {
      * \param passes A map from pass name to pass of all the passes to order
      * \return The names of the passes in submission order
      */
-    std::vector<std::string> order_passes(const std::unordered_map<std::string, material>& passes);
+    std::vector<std::string> order_passes(const std::unordered_map<std::string, render_pass>& passes);
 }
 
 #endif //RENDERER_RENDER_GRAPH_H

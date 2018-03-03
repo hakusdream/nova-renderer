@@ -121,6 +121,9 @@ namespace nova {
 
         camera player_camera;
 
+        std::vector<render_pass> passes_list;
+        std::unordered_map<std::string, std::vector<material>> materials_by_pass;
+
         void enable_debug();
 
         void init_opengl_state() const;
@@ -142,8 +145,6 @@ namespace nova {
 
         void update_gbuffer_ubos();
 
-        std::vector<material> passes_list;
-
         /*!
          * \brief Compiles the hash map of passes into a lit of passes in submission order
          *
@@ -152,13 +153,15 @@ namespace nova {
          * \param passes A hash map from pass name to pass of all the active passes.
          * \return A list of the active passes in submission order
          */
-        std::vector<material> compile_into_list(std::unordered_map<std::string, material> passes);
+        std::vector<render_pass> compile_into_list(std::unordered_map<std::string, render_pass> passes);
 
-        void render_material(const material &mat);
+        void render_geometry_for_material(const material &mat);
 
         void enable_state(const state_enum &state);
 
         void set_up_stencil_test(const GLenum face, const stencil_op_state &front_face_stencil);
+
+        void execute_pass(const render_pass &pass);
     };
 
     void link_up_uniform_buffers(std::unordered_map<std::string, gl_shader_program> &shaders, uniform_buffer_store &ubos);

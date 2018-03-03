@@ -11,6 +11,8 @@ namespace nova {
     material::material(const std::string& pass_name, const optional<std::string>& parent_pass_name, const nlohmann::json& pass_json) :
         name(pass_name), parent_name(parent_pass_name) {
 
+        pass = get_json_value<std::string>(pass_json, "pass");
+
         states = get_json_value<std::vector<state_enum>>(pass_json, "states", [&](const auto& states) {
             auto vec = std::vector<state_enum>{};
             for(auto& state : states) {
@@ -23,14 +25,6 @@ namespace nova {
             auto vec = std::vector<std::string>{};
             for(auto& define : defines) {
                 vec.push_back(define);
-            }
-            return vec;
-        });
-
-        sampler_states = get_json_value<std::vector<sampler_state>>(pass_json, "samplerStates", [&](const auto& sampler_states) {
-            auto vec = std::vector<sampler_state>{};
-            for(auto& sampler_state : sampler_states) {
-                vec.push_back(decode_sampler_state(sampler_state));
             }
             return vec;
         });
@@ -98,11 +92,21 @@ namespace nova {
 
         destination_blend_factor = get_json_value<blend_factor_enum>(pass_json, "blendDst", blend_factor_enum::from_string);
 
-        textures = get_json_value<std::vector<texture>>(pass_json, "textures", [&](const nlohmann::json& textures) {
-            auto vec = std::vector<texture>{};
+        input_textures = get_json_value<std::vector<bound_resource>>(pass_json, "inputTextures", [&](const nlohmann::json& input_textures){
+            auto vec = std::vector<bound_resource>{};
 
-            for(const auto& texture_field : textures) {
-                vec.push_back(decode_texture(texture_field));
+            for(const auto& input_texture : input_textures) {
+                vec.push_back(decode_bound_texture(input_texture));
+            }
+
+            return vec;
+        });
+
+        output_textures = get_json_value<std::vector<bound_resource>>(pass_json, "outputTextures", [&](const nlohmann::json& input_textures){
+            auto vec = std::vector<bound_resource>{};
+
+            for(const auto& input_texture : input_textures) {
+                vec.push_back(decode_bound_texture(input_texture));
             }
 
             return vec;
@@ -115,29 +119,6 @@ namespace nova {
         filters = get_json_value<std::string>(pass_json, "filters");
         fallback = get_json_value<std::string>(pass_json, "fallback");
         render_queue = get_json_value<render_queue_enum>(pass_json, "renderQueue", render_queue_enum::from_string);
-
-        dependencies = get_json_value<std::vector<std::string>>(pass_json, "dependencies", [&](const nlohmann::json& dependencies) {
-            auto vec = std::vector<std::string>{};
-            for(const auto& dependency_field : dependencies) {
-                vec.push_back(dependency_field);
-            }
-            return vec;
-        });
-
-        texture_inputs = get_json_value<std::vector<texture_resource>>(pass_json, "textureInputs", [&](const nlohmann::json& texture_resources) {
-            auto vec = std::vector<texture_resource>{};
-            for(const auto& texture_resource_field : texture_resources) {
-                vec.push_back(decode_texture_resource(texture_resource_field));
-            }
-            return vec;
-        });
-        texture_outputs = get_json_value<std::vector<texture_resource>>(pass_json, "textureOutputs", [&](const nlohmann::json& texture_resources) {
-            auto vec = std::vector<texture_resource>{};
-            for(const auto& texture_resource_field : texture_resources) {
-                vec.push_back(decode_texture_resource(texture_resource_field));
-            }
-            return vec;
-        });
     }
 
     sampler_state decode_sampler_state(const nlohmann::json& json) {
@@ -180,15 +161,18 @@ namespace nova {
         return tex;
     }
 
+    bound_resource decode_bound_texture(const nlohmann::json& json) {
+        auto res = bound_resource{};
+
+        res.name = json["name"].get<std::string>();
+        res.binding = json["binding"].get<uint32_t>();
+
+        return res;
+    }
+
     texture_resource decode_texture_resource(const nlohmann::json& json) {
         auto ret_val = texture_resource{};
 
-        // TODO: Check for the implicitly defined textures and use those instead of reading from JSON
-
-        // TODO: The pass should only say the name of the texture it uses. We'll have a separate list of textures that
-        // TODO: we read from - which makes using implicitly defined textures trivial for the user
-
-        ret_val.binding = get_json_value<uint32_t>(json, "binding").value();
         ret_val.format = get_json_value<texture_format_enum>(json, "format", texture_format_enum::from_string).value();
         ret_val.height = get_json_value<uint32_t>(json, "height").value();
         ret_val.width = get_json_value<uint32_t>(json, "width").value();

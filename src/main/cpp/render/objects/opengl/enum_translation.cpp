@@ -6,7 +6,7 @@
 #include "enum_translation.h"
 
 namespace nova {
-    GLenum stencil_op_to_gl(stencil_op_enum &op) {
+    GLenum stencil_op_to_gl(const stencil_op_enum &op) {
         switch(op) {
             case stencil_op_enum::Decr:
                 return GL_DECR;
@@ -30,7 +30,7 @@ namespace nova {
         }
     }
 
-    GLenum compare_op_to_gl(compare_op &op) {
+    GLenum compare_op_to_gl(const compare_op &op) {
         switch(op) {
             case compare_op::Never:
                 return GL_NEVER;

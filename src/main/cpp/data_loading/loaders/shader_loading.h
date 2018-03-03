@@ -39,8 +39,8 @@ namespace nova {
      *      - A resolution (relative to the screen, or in absolute pixels)
      *      - A format
      */
-    struct shaderpack {
-        std::unordered_map<std::string, material> materials_by_pass;
+    struct shaderpack_data {
+        std::unordered_map<std::string, std::vector<material>> materials_by_pass;
         std::unordered_map<std::string, render_pass> passes;
         std::unordered_map<std::string, texture_resource> dynamic_textures;
     };
@@ -71,11 +71,11 @@ namespace nova {
      * \param shaderpack_path The name of the shaderpack folder to load things from
      * \return A map from pass name to pass of all the passes found in that folder
      */
-    std::unordered_map<std::string, material> load_materials_from_folder(const fs::path &shaderpack_path);
+    std::unordered_map<std::string, std::vector<material>> load_materials_from_folder(const fs::path &shaderpack_path);
 
     std::vector<material> read_material_files(const fs::path& shaderpack_path);
 
-    std::vector<material> parse_passes_from_json(const nlohmann::json &shaders_json);
+    std::vector<material> parse_materials_from_json(const nlohmann::json &shaders_json);
 
     /*!
      * \brief Gets a list of all the files in the given folder

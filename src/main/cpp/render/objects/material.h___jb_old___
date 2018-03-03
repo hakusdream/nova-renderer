@@ -642,7 +642,7 @@ namespace nova {
 
     texture_resource decode_texture_resource(const nlohmann::json& json);
 
-    bound_resource decode_bound_texture(const nlohmann::json& json);
+    bound_resoruce decode_bound_texture(const nlohmann::json& json);
 }
 
 

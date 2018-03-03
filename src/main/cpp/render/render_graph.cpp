@@ -24,12 +24,12 @@ namespace nova {
      * passes, there's a circular dependency somewhere in the render graph. This is Bad and we hate it
      */
     void add_dependent_passes(const std::string &pass_name,
-                              const std::unordered_map<std::string, material>& passes,
-                              const std::vector<std::string>& ordered_passes,
+                              const std::unordered_map<std::string, render_pass>& passes,
+                              std::vector<std::string>& ordered_passes,
                               const std::unordered_map<std::string, std::vector<std::string>>& resource_to_write_pass,
                               uint32_t depth);
 
-    std::vector<std::string> order_passes(std::unordered_map<std::string, material> passes) {
+    std::vector<std::string> order_passes(const std::unordered_map<std::string, render_pass> &passes) {
         auto ordered_passes = std::vector<std::string>{};
 
         /*
@@ -43,7 +43,7 @@ namespace nova {
         for(const auto& item : passes) {
             auto& pass = item.second;
 
-            for(const auto& output : pass.outputs) {
+            for(const auto& output : pass.texture_outputs.value()) {
                 resource_to_write_pass[output].push_back(pass.name);
             }
         }
@@ -89,12 +89,13 @@ namespace nova {
             ordered_passes.erase(output_itr, ordered_passes.end());
         }
 
-        // Granite does some reordering to try and find a submission order that
+        // Granite does some reordering to try and find a submission order that has the fewest pipeline barriers. While
+        //
     }
 
     void add_dependent_passes(const std::string &pass_name,
-                              const std::unordered_map<std::string, material>& passes,
-                              const std::vector<std::string>& ordered_passes,
+                              const std::unordered_map<std::string, render_pass>& passes,
+                              std::vector<std::string>& ordered_passes,
                               const std::unordered_map<std::string, std::vector<std::string>>& resource_to_write_pass,
                               const uint32_t depth) {
         if(depth > passes.size()) {
@@ -102,7 +103,7 @@ namespace nova {
             throw render_graph_validation_error("circular graph");
         }
 
-        const auto& pass = passes[pass_name];
+        const auto& pass = passes.at(pass_name);
 
         // Add all the passes that this pass is dependent on
         if(pass.dependencies) {
@@ -119,7 +120,7 @@ namespace nova {
                     LOG(ERROR) << "Pass " << pass_name << " reads from resource " << texture_name << ", but nothing writes to it";
 
                 } else {
-                    const auto &write_passes = resource_to_write_pass[texture_name];
+                    const auto &write_passes = resource_to_write_pass.at(texture_name);
                     ordered_passes.insert(ordered_passes.end(), write_passes.begin(), write_passes.end());
 
                     for(const auto& write_pass : write_passes) {
@@ -132,7 +133,7 @@ namespace nova {
 
     render_graph_validation_error::render_graph_validation_error(std::string msg) : msg(msg) {}
 
-    const char *render_graph_validation_error::what() const {
+    const char *render_graph_validation_error::what() const noexcept {
         return msg.c_str();
     }
 }
