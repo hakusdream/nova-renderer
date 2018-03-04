@@ -237,13 +237,15 @@ namespace nova {
         return *meshes;
     }
 
-    std::vector<material *> nova_renderer::get_all_materials() {
+    const std::vector<const material *> nova_renderer::get_all_materials() {
         auto materials = std::vector<const material *>{};
         for(const auto& item : materials_by_pass) {
             for(const auto& mat : item.second) {
                 materials.push_back(&mat);
             }
         }
+
+        return materials;
     }
 
     void nova_renderer::load_new_shaderpack(const std::string &new_shaderpack_name) {

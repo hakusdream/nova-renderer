@@ -162,14 +162,23 @@ namespace nova {
         auto passes = std::unordered_map<std::string, render_pass>{};
 
         for(const auto& pass_json : json) {
-            auto pass_node = pass_json.value();
-
-            auto pass = render_pass(pass_node);
+            auto pass = render_pass(pass_json);
             passes[pass.name] = pass;
         }
 
         return passes;
     }
+
+    std::unordered_map<std::string, texture_resource> parse_textures_from_json(nlohmann::json& json) {
+        auto textures = std::unordered_map<std::string, texture_resource>{};
+
+        for(const auto& texture_json : json) {
+            auto texture = texture_resource(texture_json);
+            textures[texture.name] = texture;
+        }
+
+        return textures;
+    };
 
     std::string get_filename_from_include(const std::string& include_line) {
         auto quote_pos = include_line.find('"');

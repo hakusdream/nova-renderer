@@ -323,6 +323,10 @@ namespace nova {
 
             should_return_next = true;
         }
+
+        LOG(ERROR) << "Never should have come here!";
+        LOG(ERROR) << "That's a horrible error message so here's another one: Nova should have gotten the name of the shaderpack from a file path but it didn't so now we're here and there's no reasonable defaults and everything's aweful";
+        return {};
     }
 
     fs::path get_included_file_path(const fs::path &shader_path, const fs::path &included_file_name) {
@@ -365,7 +369,7 @@ namespace nova {
         auto passes_json = load_json_from_stream(passes_stream);
 
         return parse_passes_from_json(passes_json);
-    };
+    }
 
     std::unordered_map<std::string, texture_resource> load_texture_definitions_from_folder(const fs::path& shaderpack_path) {
         auto resources_path = shaderpack_path / "resoruces.json";
@@ -376,6 +380,6 @@ namespace nova {
         auto resoruces_stream = std::ifstream{stringpath};
         auto resoruces_json = load_json_from_stream(resoruces_stream);
 
-        return parse_textures_from_json(resoruces_json);
-    };
+        return parse_textures_from_json(resoruces_json["textures"]);
+    }
 }

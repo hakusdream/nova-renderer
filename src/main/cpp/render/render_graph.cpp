@@ -90,7 +90,10 @@ namespace nova {
         }
 
         // Granite does some reordering to try and find a submission order that has the fewest pipeline barriers. While
-        //
+        // doing that may be useful in the future, the fact that I'm using OpenGL means I'm not going to worry about
+        // that for noe
+
+        return ordered_passes;
     }
 
     void add_dependent_passes(const std::string &pass_name,

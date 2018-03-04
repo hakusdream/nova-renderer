@@ -90,6 +90,13 @@ namespace nova {
     std::vector<material> parse_materials_from_json(const nlohmann::json &shaders_json);
 
     /*!
+     * \brief Parses a list of texture resource definitions from the provided JSON array
+     * \param json A JSON array of texture_resoruce objects
+     * \return A map from the name of the texture resource to the texture resoruce itself
+     */
+    std::unordered_map<std::string, texture_resource> parse_textures_from_json(nlohmann::json& json);
+
+    /*!
      * \brief Gets a list of all the files in the given folder
      *
      * \param shaderpack_name The name of the shaderpack to get the names of the shaders in

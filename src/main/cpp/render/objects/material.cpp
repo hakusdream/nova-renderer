@@ -170,19 +170,8 @@ namespace nova {
         return res;
     }
 
-    texture_resource decode_texture_resource(const nlohmann::json& json) {
-        auto ret_val = texture_resource{};
-
-        ret_val.format = get_json_value<texture_format_enum>(json, "format", texture_format_enum::from_string).value();
-        ret_val.height = get_json_value<uint32_t>(json, "height").value();
-        ret_val.width = get_json_value<uint32_t>(json, "width").value();
-        ret_val.name = get_json_value<std::string>(json, "name").value();
-
-        return ret_val;
-    }
-
     render_pass::render_pass(const nlohmann::json &pass_json) {
-        name = pass_json["name"];
+        name = pass_json["name"].get<std::string>();
         dependencies = get_json_value<std::vector<std::string>>(pass_json, "dependencies", [&](const nlohmann::json& dependency_json) {
             auto vec = std::vector<std::string>{};
             for(const auto& val : dependency_json) {
@@ -204,5 +193,13 @@ namespace nova {
             }
             return vec;
         });
+    }
+
+    texture_resource::texture_resource(const nlohmann::json &json) {
+        name = json["name"].get<std::string>();
+        format = texture_format_enum::from_string(json["format"]);
+        dimension_type = texture_dimension_type_enum::from_string(json["dimensionType"]);
+        width = json["width"];
+        height = json["height"];
     }
 }

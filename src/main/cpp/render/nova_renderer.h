@@ -95,7 +95,7 @@ namespace nova {
          * There's an assumption here that no more materials will be loaded after this function is called - or it'll
          * \return
          */
-        std::vector<material*> get_all_materials();
+        const std::vector<const material*> get_all_materials();
 
         // Overrides from iconfig_listener
 

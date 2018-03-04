@@ -379,8 +379,6 @@ namespace nova {
          */
         float height;
 
-        texture_resource() = default;
-
         explicit texture_resource(const nlohmann::json& json);
     };
 
@@ -660,6 +658,8 @@ namespace nova {
     stencil_op_state decode_stencil_buffer_state(const nlohmann::json &json);
 
     texture decode_texture(const nlohmann::json& texture_json);
+
+    texture_resource decode_texture_resource(const nlohmann::json& json);
 
     bound_resource decode_bound_texture(const nlohmann::json& json);
 }
