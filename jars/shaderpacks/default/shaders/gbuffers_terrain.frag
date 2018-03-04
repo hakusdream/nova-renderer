@@ -1,7 +1,7 @@
 #version 450
 
 layout(binding = 0) uniform sampler2D colortex;
-layout(binding = 4) uniform sampler2D lightmap;
+layout(binding = 3) uniform sampler2D lightmap;
 
 layout(std140) uniform per_frame_uniforms {
     mat4 gbufferModelView;

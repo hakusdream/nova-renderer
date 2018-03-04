@@ -13,6 +13,7 @@
 #include "../../../mc_interface/mc_objects.h"
 #include "texture2D.h"
 #include "../../../utils/smart_enum.h"
+#include "../material.h"
 
 namespace nova {
     /*!
@@ -74,6 +75,8 @@ namespace nova {
          * \brief De-allocates all OpenGL textures and clears all data, making way for a new resource pack's textures
          */
         void reset();
+
+        void create_dynamic_textures(const std::unordered_map<std::string, texture_resource>& textures, const std::vector<render_pass>& passes);
 
         /*!
          * \brief Updates the texture with the given name with the given data

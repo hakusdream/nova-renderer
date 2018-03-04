@@ -118,4 +118,15 @@ namespace nova {
         }
         return max_texture_size;
     }
+
+    void texture_manager::create_dynamic_textures(const std::unordered_map<std::string, texture_resource> &textures,
+                                                  const std::vector<render_pass> &passes) {
+        // For each texture in the passes, try to assign it to an existing resource
+        // We'll basically create a list of which texture resources can be assigned to each physical resource
+        // We want to alias textures. We can alias texture A and B if all reads from A finish before all writes to B AND
+        // if A and B have the same format and dimension
+        // Maybe we should make a list of things with the same format and dimension?
+
+        std::unordered_map<
+    }
 }

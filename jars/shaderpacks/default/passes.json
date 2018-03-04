@@ -1,7 +1,7 @@
 
 [
     {
-        "name": "gbuffers",
-        "textureOutputs": ["backbuffer"]
+        "name": "forward",
+        "textureOutputs": ["Backbuffer"]
     }
 ]

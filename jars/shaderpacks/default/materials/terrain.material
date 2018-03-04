@@ -1,0 +1,52 @@
+{
+    "solid_terrain": {
+        "pass": "forward",
+
+        "vertexShader": "gbuffers_terrain",
+        "fragmentShader": "gubffers_terrain",
+
+        "vertexFields": [
+            {
+                "field": "Position"
+            },
+            {
+                "field": "UV0"
+            },
+            {
+                "field": "UV1"
+            },
+            {
+                "field": "Normal"
+            },
+            {
+                "field": "Color"
+            }
+        ],
+
+        "primitiveMode": "Triangles",
+
+        "inputTextures": [
+            {
+                "name": "ColorVirturalTexture",
+                "binding": 0
+            },
+            {
+                "name": "Lightmap",
+                "binding": 3
+            }
+        ],
+
+        "outputTextures": [
+            {
+                "name": "Backbuffer",
+                "binding": 0
+            }
+        ],
+
+        "filters": "geometry_type::block AND not_transparent",
+
+        "depthFunc": "Less",
+
+        "renderQueue": "Cutout"
+    }
+}

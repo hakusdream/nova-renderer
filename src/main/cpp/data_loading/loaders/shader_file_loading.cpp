@@ -372,7 +372,12 @@ namespace nova {
     }
 
     std::unordered_map<std::string, texture_resource> load_texture_definitions_from_folder(const fs::path& shaderpack_path) {
-        auto resources_path = shaderpack_path / "resoruces.json";
+        fs::path resources_path = shaderpack_path / "resources.json";
+        if(!fs::exists(resources_path)) {
+            // No resources - so let's just early out
+            return {};
+        }
+
         auto ss = std::stringstream{};
         ss << resources_path;
         auto stringpath = ss.str().substr(1);

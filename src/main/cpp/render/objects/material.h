@@ -324,6 +324,30 @@ namespace nova {
                Absolute
     )
 
+    struct texture_format {
+        /*!
+         * \brief The format of the texture
+         */
+        texture_format_enum format;
+
+        /*!
+         * \brief How to interpret the dimensions of this texture
+         */
+        texture_dimension_type_enum dimension_type;
+
+        /*!
+         * \brief The width, in pixels, of the texture
+         */
+        float width;
+        /*!
+         * \brief The height, in pixels, of the texture
+         */
+        float height;
+    };
+
+    bool operator==(const texture_format& rhs, const texture_format& lhs);
+    bool operator!=(const texture_format& rhs, const texture_format& lhs);
+
     /*!
      * \brief A texture that a pass can use
      */
@@ -350,6 +374,10 @@ namespace nova {
          *      - If no data texture exists for a given object, a texture with an RGBA of (0, 0, 0, 0) is used
          *      - Always has a format of R8G8B8A8
          *      - Can only be used as a pass's input
+         * - Lightmap
+         *      - Lightmap, loaded from the current resourcepack
+         *      - Format of RGB8
+         *      - Can only be used as an input
          * - Backbuffer
          *      - The texture that gets presented to the screen
          *      - Always has a format of R8G8B8
@@ -360,24 +388,7 @@ namespace nova {
          */
         std::string name;
 
-        /*!
-         * \brief The format of the texture
-         */
-        texture_format_enum format;
-
-        /*!
-         * \brief How to interpret the dimensions of this texture
-         */
-        texture_dimension_type_enum dimension_type;
-
-        /*!
-         * \brief The width, in pixels, of the texture
-         */
-        float width;
-        /*!
-         * \brief The height, in pixels, of the texture
-         */
-        float height;
+        texture_format format;
 
         texture_resource() = default;
 
@@ -417,7 +428,7 @@ namespace nova {
      * The inputs and outputs of a pass must be resources declared in the shaderpack's `resources.json` file (or the
      * default resources.json), or a resource that's internal to Nova. For example, Nova provides a UBO of uniforms that
      * change per frame, a UBO for per-model data like the model matrix, and the virtual texture atlases. The default
-     * resources.json file sets up sizteen framebuffer color attachments for ping-pong buffers, a depth attachment,
+     * resources.json file sets up sixteen framebuffer color attachments for ping-pong buffers, a depth attachment,
      * some shadow maps, etc
      */
     struct render_pass {
@@ -577,7 +588,7 @@ namespace nova {
         optional<float> slope_scaled_depth_bias;
 
         /*!
-         * \brief A reference to a stencil somehow?
+         * \brief The reference value to use for the stencil test
          */
         optional<uint32_t> stencil_ref;
 

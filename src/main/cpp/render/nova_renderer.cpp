@@ -266,8 +266,10 @@ namespace nova {
         LOG(INFO) << "Loading shaderpack " << new_shaderpack_name << "...";
         auto shaderpack = load_shaderpack(new_shaderpack_name);
 
+        materials_by_pass = shaderpack.materials_by_pass;
+
+        LOG(INFO) << "Compiling passes...";
         try {
-            LOG(INFO) << "Compiling passes...";
             passes_list = compile_into_list(shaderpack.passes);
         } catch(render_graph_validation_error& e) {
             LOG(ERROR) << "Could not load shaderpack " << new_shaderpack_name << ": " << e.what();
@@ -276,6 +278,7 @@ namespace nova {
             return;
         }
 
+        textures->create_dynamic_textures(shaderpack.dynamic_textures, passes_list);
 
 
 
