@@ -197,7 +197,7 @@ namespace nova {
 
     texture_resource::texture_resource(const nlohmann::json &json) {
         name = json["name"].get<std::string>();
-        format.pixel_format = texture_format_enum::from_string(json["format"]);
+        format.pixel_format = pixel_format_enum::from_string(json["format"]);
         format.dimension_type = texture_dimension_type_enum::from_string(json["dimensionType"]);
         format.width = json["width"];
         format.height = json["height"];

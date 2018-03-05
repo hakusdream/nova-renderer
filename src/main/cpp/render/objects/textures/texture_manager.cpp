@@ -235,14 +235,14 @@ namespace nova {
 
         for(auto i = 0; i < resources_in_order.size(); i++) {
             const auto& to_alias_name = resources_in_order[i];
-            const auto& to_alias_format = textures[to_alias_name].format;
+            const auto& to_alias_format = textures.at(to_alias_name).format;
 
             // Only try to alias with lower-indexed resources
             for(auto j = 0; j < i; j++) {
                 const auto& try_alias_name = resources_in_order[j];
-                if(resource_used_range[to_alias_name].is_disjoint_with(resource_used_range[try_alias_name]) {
+                if(resource_used_range[to_alias_name].is_disjoint_with(resource_used_range[try_alias_name])) {
                     // They can be aliased if they have the same format
-                    const auto& try_alias_format = textures[try_alias_name].format;
+                    const auto& try_alias_format = textures.at(try_alias_name).format;
                     if(to_alias_format == try_alias_format) {
                         aliases[to_alias_name] = try_alias_name;
                     }
@@ -255,7 +255,7 @@ namespace nova {
         //  - If it is in the aliases map, follow its chain of aliases
 
         for(const auto& named_texture : textures) {
-            std::string &texture_name = named_texture.first;
+            std::string texture_name = named_texture.first;
             while(aliases.find(texture_name) != aliases.end()) {
                 texture_name = aliases[texture_name];
             }
@@ -263,7 +263,7 @@ namespace nova {
             // We've found the first texture in this alias chain - let's create an actual texture for it if needed
             if(dynamic_tex_name_to_idx.find(texture_name) != dynamic_tex_name_to_idx.end()) {
                 // The texture we're all aliasing doesn't have a real texture yet. Let's fix that
-                texture_format& format = textures[texture_name].format;
+                const texture_format& format = textures.at(texture_name).format;
                 auto tex = texture2D();
                 auto dimensions = glm::ivec2{format.width, format.height};
                 auto internal_format = get_gl_format_from_pixel_format(format.pixel_format);
@@ -299,7 +299,7 @@ namespace nova {
                 return GL_DEPTH_COMPONENT24;
             case pixel_format_enum::DepthStencil:
                 return GL_DEPTH24_STENCIL8;
-            case default:
+            default:
                 LOG(WARNING) << "Could not determine OpenGL format for pixel format " << pixel_format_enum::to_string(format);
                 return GL_RGB8;
         }

@@ -326,7 +326,7 @@ namespace nova {
 
         LOG(ERROR) << "Never should have come here!";
         LOG(ERROR) << "That's a horrible error message so here's another one: Nova should have gotten the name of the shaderpack from a file path but it didn't so now we're here and there's no reasonable defaults and everything's aweful";
-        return {};
+        return fs::path{};
     }
 
     fs::path get_included_file_path(const fs::path &shader_path, const fs::path &included_file_name) {
