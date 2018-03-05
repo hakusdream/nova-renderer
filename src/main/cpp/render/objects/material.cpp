@@ -197,14 +197,14 @@ namespace nova {
 
     texture_resource::texture_resource(const nlohmann::json &json) {
         name = json["name"].get<std::string>();
-        format.format = texture_format_enum::from_string(json["format"]);
+        format.pixel_format = texture_format_enum::from_string(json["format"]);
         format.dimension_type = texture_dimension_type_enum::from_string(json["dimensionType"]);
         format.width = json["width"];
         format.height = json["height"];
     }
 
     bool operator==(const texture_format& rhs, const texture_format& lhs) {
-        return rhs.format == lhs.format && rhs.width == lhs.width && rhs.height == lhs.height;
+        return rhs.pixel_format == lhs.pixel_format && rhs.width == lhs.width && rhs.height == lhs.height;
     }
 
     bool operator!=(const texture_format& rhs, const texture_format& lhs) {

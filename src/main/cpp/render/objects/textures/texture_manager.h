@@ -144,6 +144,18 @@ namespace nova {
         std::unordered_map<std::string, texture_location> locations;
 
         int max_texture_size = -1;
+
+        /*!
+         * \brief All the dynamic textures that are active for the current shaderpack
+         */
+        std::vector<texture2D> dynamic_textures;
+
+        /*!
+         * \brief A map from texture name to index in the dynamic textures vector
+         */
+        std::unordered_map<std::string, std::size_t> dynamic_tex_name_to_idx;
+
+        GLenum get_gl_format_from_pixel_format(pixel_format_enum format);
     };
 }
 

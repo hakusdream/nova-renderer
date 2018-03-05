@@ -62,4 +62,8 @@ namespace nova {
     const std::string &texture2D::get_name() const {
         return name;
     }
+
+    void texture2D::allocate_space(glm::ivec2 &dimensions, GLenum internal_format, uint32_t levels) {
+        glTextureStorage2D(gl_name, levels, internal_format, dimensions.x, dimensions.y);
+    }
 }

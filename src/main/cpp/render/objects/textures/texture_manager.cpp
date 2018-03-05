@@ -119,6 +119,7 @@ namespace nova {
         return max_texture_size;
     }
 
+    // Implementation based on RenderGraph::build_aliases from the Granite engine
     void texture_manager::create_dynamic_textures(const std::unordered_map<std::string, texture_resource> &textures,
                                                   const std::vector<render_pass> &passes) {
         // For each texture in the passes, try to assign it to an existing resource
@@ -127,6 +128,180 @@ namespace nova {
         // if A and B have the same format and dimension
         // Maybe we should make a list of things with the same format and dimension?
 
-        std::unordered_map<
+        struct range {
+            uint32_t first_write_pass = ~0u;
+            uint32_t last_write_pass = 0;
+            uint32_t first_read_pass = ~0u;
+            uint32_t last_read_pass = 0;
+
+            bool has_writer() const
+            {
+                return first_write_pass <= last_write_pass;
+            }
+
+            bool has_reader() const
+            {
+                return first_read_pass <= last_read_pass;
+            }
+
+            bool is_used() const
+            {
+                return has_writer() || has_reader();
+            }
+
+            bool can_alias() const
+            {
+                // If we read before we have completely written to a resource we need to preserve it, so no alias is possible.
+                return !(has_reader() && has_writer() && first_read_pass <= first_write_pass);
+            }
+
+            unsigned last_used_pass() const
+            {
+                unsigned last_pass = 0;
+                if (has_writer())
+                    last_pass = std::max(last_pass, last_write_pass);
+                if (has_reader())
+                    last_pass = std::max(last_pass, last_read_pass);
+                return last_pass;
+            }
+
+            unsigned first_used_pass() const
+            {
+                unsigned first_pass = ~0u;
+                if (has_writer())
+                    first_pass = std::min(first_pass, first_write_pass);
+                if (has_reader())
+                    first_pass = std::min(first_pass, first_read_pass);
+                return first_pass;
+            }
+
+            bool is_disjoint_with(const range& other) const {
+                if (!is_used() || !other.is_used())
+                    return false;
+                if (!can_alias() || !other.can_alias())
+                    return false;
+
+                bool left = last_used_pass() < other.first_used_pass();
+                bool right = other.last_used_pass() < first_used_pass();
+                return left || right;
+            }
+        };
+
+        // Look at what range of render passes each resource is used in
+        std::unordered_map<std::string, range> resource_used_range;
+        std::vector<std::string> resources_in_order;
+
+        uint32_t pass_idx = 0;
+        for(const auto& pass : passes) {
+            if(pass.texture_inputs) {
+                for(const auto &input : pass.texture_inputs.value()) {
+                    auto& tex_range = resource_used_range[input];
+
+                    if(pass_idx < tex_range.first_write_pass) {
+                        tex_range.first_write_pass = pass_idx;
+
+                    } else if(pass_idx > tex_range.last_write_pass) {
+                        tex_range.last_write_pass = pass_idx;
+                    }
+
+                    if(std::find(resources_in_order.begin(), resources_in_order.end(), input) == resources_in_order.end()) {
+                        resources_in_order.push_back(input);
+                    }
+                }
+            }
+
+            if(pass.texture_outputs) {
+                for(const auto &output : pass.texture_outputs.value()) {
+                    auto& tex_range = resource_used_range[output];
+
+                    if(pass_idx < tex_range.first_write_pass) {
+                        tex_range.first_write_pass = pass_idx;
+
+                    } else if(pass_idx > tex_range.last_write_pass) {
+                        tex_range.last_write_pass = pass_idx;
+                    }
+
+                    if(std::find(resources_in_order.begin(), resources_in_order.end(), output) == resources_in_order.end()) {
+                        resources_in_order.push_back(output);
+                    }
+                }
+            }
+
+            pass_idx++;
+        }
+
+        // Figure out which resources can be aliased
+        std::unordered_map<std::string, std::string> aliases;
+
+        for(auto i = 0; i < resources_in_order.size(); i++) {
+            const auto& to_alias_name = resources_in_order[i];
+            const auto& to_alias_format = textures[to_alias_name].format;
+
+            // Only try to alias with lower-indexed resources
+            for(auto j = 0; j < i; j++) {
+                const auto& try_alias_name = resources_in_order[j];
+                if(resource_used_range[to_alias_name].is_disjoint_with(resource_used_range[try_alias_name]) {
+                    // They can be aliased if they have the same format
+                    const auto& try_alias_format = textures[try_alias_name].format;
+                    if(to_alias_format == try_alias_format) {
+                        aliases[to_alias_name] = try_alias_name;
+                    }
+                }
+            }
+        }
+
+        // For each texture:
+        //  - If it isn't in the aliases map, create a new texture with its format and add it to the textures map
+        //  - If it is in the aliases map, follow its chain of aliases
+
+        for(const auto& named_texture : textures) {
+            std::string &texture_name = named_texture.first;
+            while(aliases.find(texture_name) != aliases.end()) {
+                texture_name = aliases[texture_name];
+            }
+
+            // We've found the first texture in this alias chain - let's create an actual texture for it if needed
+            if(dynamic_tex_name_to_idx.find(texture_name) != dynamic_tex_name_to_idx.end()) {
+                // The texture we're all aliasing doesn't have a real texture yet. Let's fix that
+                texture_format& format = textures[texture_name].format;
+                auto tex = texture2D();
+                auto dimensions = glm::ivec2{format.width, format.height};
+                auto internal_format = get_gl_format_from_pixel_format(format.pixel_format);
+                tex.allocate_space(dimensions, internal_format);
+
+                auto new_tex_index = dynamic_textures.size();
+                dynamic_textures.push_back(tex);
+                dynamic_tex_name_to_idx[texture_name] = new_tex_index;
+                dynamic_tex_name_to_idx[named_texture.first] = new_tex_index;
+
+            } else {
+                // The texture we're aliasing already has a real texture behind it - so let's use that
+                dynamic_tex_name_to_idx[named_texture.first] = dynamic_tex_name_to_idx[texture_name];
+            }
+        }
+    }
+
+    GLenum texture_manager::get_gl_format_from_pixel_format(pixel_format_enum format) {
+        switch(format) {
+            case pixel_format_enum::RGB8:
+                return GL_RGB8;
+            case pixel_format_enum::RGBA8:
+                return GL_RGBA8;
+            case pixel_format_enum::RGB16F:
+                return GL_RGB16F;
+            case pixel_format_enum::RGBA16F:
+                return GL_RGBA16F;
+            case pixel_format_enum::RGB32F:
+                return GL_RGB32F;
+            case pixel_format_enum::RGBA32F:
+                return GL_RGBA32F;
+            case pixel_format_enum::Depth:
+                return GL_DEPTH_COMPONENT24;
+            case pixel_format_enum::DepthStencil:
+                return GL_DEPTH24_STENCIL8;
+            case default:
+                LOG(WARNING) << "Could not determine OpenGL format for pixel format " << pixel_format_enum::to_string(format);
+                return GL_RGB8;
+        }
     }
 }

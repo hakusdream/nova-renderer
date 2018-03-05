@@ -79,6 +79,8 @@ namespace nova {
          */
         void set_data(void* pixel_data, glm::ivec2 &dimensions, GLenum format, GLenum type = GL_FLOAT, GLenum internal_format = GL_RGBA);
 
+        void allocate_space(glm::ivec2& dimensions, GLenum internal_format, uint32_t levels = 1);
+
         void set_filtering_parameters(texture_filtering_params &params);
 
         /*!
@@ -107,7 +109,7 @@ namespace nova {
          */
         const unsigned int &get_gl_name() const;
 
-        void set_name(const std::string name);
+        void set_name(std::string name);
         const std::string& get_name() const;
 
     private:

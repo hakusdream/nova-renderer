@@ -309,14 +309,15 @@ namespace nova {
                Cutout
     )
 
-    SMART_ENUM(texture_format_enum,
+    SMART_ENUM(pixel_format_enum,
                RGB8,
                RGBA8,
-               RGB16,
-               RGBA16,
-               RGB32,
-               RGBA32,
-               R24
+               RGB16F,
+               RGBA16F,
+               RGB32F,
+               RGBA32F,
+               Depth,
+               DepthStencil,
     )
 
     SMART_ENUM(texture_dimension_type_enum,
@@ -328,7 +329,7 @@ namespace nova {
         /*!
          * \brief The format of the texture
          */
-        texture_format_enum format;
+        pixel_format_enum pixel_format;
 
         /*!
          * \brief How to interpret the dimensions of this texture
@@ -380,7 +381,7 @@ namespace nova {
          *      - Can only be used as an input
          * - Backbuffer
          *      - The texture that gets presented to the screen
-         *      - Always has a format of R8G8B8
+         *      - Always has a format of RGB8
          *      - Can only be used as a pass's output
          *
          * If you use one of the virtual textures, then all fields except the binding are ignored
