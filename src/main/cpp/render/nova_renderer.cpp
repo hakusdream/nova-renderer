@@ -278,7 +278,11 @@ namespace nova {
             return;
         }
 
+        LOG(INFO) << "Initializing framebuffer attachments...";
         textures->create_dynamic_textures(shaderpack.dynamic_textures, passes_list);
+
+        LOG(INFO) << "Building framebuffers...";
+        create_framebuffers_from_shaderpack();
 
 
 
@@ -286,36 +290,23 @@ namespace nova {
         link_up_uniform_buffers(loaded_shaderpack->get_loaded_shaders(), *ubo_manager);
         LOG(DEBUG) << "Linked up UBOs";
 
-        create_framebuffers_from_shaderpack();
         */
     }
 
     void nova_renderer::create_framebuffers_from_shaderpack() {
-        // TODO: Examine the shaderpack and determine what's needed
-        // For now, just create framebuffers with all possible attachments
+        for(const auto& pass_materials : materials_by_pass) {
+            for(const auto& mat : pass_materials.second) {
+                // A smart algorithm would look at each material any only create one framebuffer for each set of bound
+                // textures... but I don't feel like being clever
 
-        auto settings = render_settings->get_options()["settings"];
+                framebuffers_by_material[mat.name] = make_framebuffer_for_material(mat);
+            }
+        }
+    }
 
-        main_framebuffer_builder.set_framebuffer_size(settings["viewWidth"], settings["viewHeight"])
-                                .enable_color_attachment(0)
-                                .enable_color_attachment(1)
-                                .enable_color_attachment(2)
-                                .enable_color_attachment(3)
-                                .enable_color_attachment(4)
-                                .enable_color_attachment(5)
-                                .enable_color_attachment(6)
-                                .enable_color_attachment(7);
-
-        main_framebuffer = std::make_unique<framebuffer>(main_framebuffer_builder.build());
-
-        shadow_framebuffer_builder.set_framebuffer_size(settings["shadowMapResolution"], settings["shadowMapResolution"])
-                                  .enable_color_attachment(0)
-                                  .enable_color_attachment(1)
-                                  .enable_color_attachment(2)
-                                  .enable_color_attachment(3);
-
-        shadow_framebuffer = std::make_unique<framebuffer>(shadow_framebuffer_builder.build());
-
+    framebuffer nova_renderer::make_framebuffer_for_material(const material &mat) {
+        auto fb = framebuffer();
+        return fb;
     }
 
     void nova_renderer::deinit() {

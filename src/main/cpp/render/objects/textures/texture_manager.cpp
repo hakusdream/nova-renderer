@@ -107,7 +107,12 @@ namespace nova {
     }
 
     texture2D &texture_manager::get_texture(std::string texture_name) {
-        return atlases[texture_name];
+        if(atlases.find(texture_name) != atlases.end()) {
+            return atlases[texture_name];
+        }
+
+        auto idx = dynamic_tex_name_to_idx[texture_name];
+        return dynamic_textures[idx];
     }
 
     int texture_manager::get_max_texture_size() {
@@ -127,6 +132,8 @@ namespace nova {
         // We want to alias textures. We can alias texture A and B if all reads from A finish before all writes to B AND
         // if A and B have the same format and dimension
         // Maybe we should make a list of things with the same format and dimension?
+
+        clear_dynamic_textures();
 
         struct range {
             uint32_t first_write_pass = ~0u;
@@ -303,5 +310,10 @@ namespace nova {
                 LOG(WARNING) << "Could not determine OpenGL format for pixel format " << pixel_format_enum::to_string(format);
                 return GL_RGB8;
         }
+    }
+
+    void texture_manager::clear_dynamic_textures() {
+        dynamic_textures.resize(0);
+        dynamic_tex_name_to_idx.erase(dynamic_tex_name_to_idx.begin(), dynamic_tex_name_to_idx.end());
     }
 }

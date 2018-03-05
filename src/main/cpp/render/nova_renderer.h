@@ -130,7 +130,8 @@ namespace nova {
         camera player_camera;
 
         std::vector<render_pass> passes_list;
-        std::unordered_map<std::string, std::vector<material>> materials_by_pass;
+        std::unordered_map<std::string, std::vector<material>> materials_by_pass
+        std::unordered_map<std::string, framebuffer> framebuffers_by_material;
 
         void enable_debug();
 
@@ -138,6 +139,9 @@ namespace nova {
 
         void load_new_shaderpack(const std::string &new_shaderpack_name);
 
+        /*!
+         * \brief Examines all the loaded materials,
+         */
         void create_framebuffers_from_shaderpack();
 
         /*!
@@ -160,6 +164,8 @@ namespace nova {
         void set_up_stencil_test(GLenum face, const stencil_op_state &front_face_stencil);
 
         void execute_pass(const render_pass &pass);
+
+        framebuffer make_framebuffer_for_material(const material& mat);
     };
 
     /*!

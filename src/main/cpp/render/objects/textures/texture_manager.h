@@ -19,6 +19,9 @@ namespace nova {
     /*!
      * \brief Holds all the textures that the Nova Renderer can deal with
      *
+     * There's an assumption in this class that the loaded textures won't change significanlty over the coiurse of a
+     * gameplay session
+     *
      * This class does a few things. I'm going to walk you through a couple usage scenarios because it's way easier for
      * me to explain things that way
      *
@@ -156,6 +159,8 @@ namespace nova {
         std::unordered_map<std::string, std::size_t> dynamic_tex_name_to_idx;
 
         GLenum get_gl_format_from_pixel_format(pixel_format_enum format);
+
+        void clear_dynamic_textures();
     };
 }
 
