@@ -23,7 +23,7 @@ namespace nova {
     public:
         framebuffer();
 
-        framebuffer(framebuffer &&other);
+        framebuffer(framebuffer &&other) noexcept;
 
         ~framebuffer();
 

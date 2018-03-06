@@ -33,7 +33,7 @@ namespace nova {
          */
         uniform_buffer_store();
 
-        void register_all_buffers_with_shader(const gl_shader_program &shader) noexcept;
+        void register_all_buffers_with_shader(const std::shared_ptr<gl_shader_program> shader) noexcept;
 
         void update();
 

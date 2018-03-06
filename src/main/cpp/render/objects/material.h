@@ -569,6 +569,11 @@ namespace nova {
         optional<std::vector<bound_resource>> output_textures;
 
         /*!
+         * \brief The depth texture to use for this material
+         */
+        optional<bound_resource> depth_texture;
+
+        /*!
          * \brief The filter string used to get data for this material
          */
         optional<std::string> filters;

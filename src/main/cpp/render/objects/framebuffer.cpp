@@ -52,7 +52,7 @@ namespace nova {
                 LOG(ERROR) << "Every drawing buffer has an attachment";
                 break;
             case GL_FRAMEBUFFER_UNSUPPORTED:
-                LOG(ERROR) << "The framebuffrer format is not supported";
+                LOG(ERROR) << "The framebuffer format is not supported";
                 break;
         }
     }

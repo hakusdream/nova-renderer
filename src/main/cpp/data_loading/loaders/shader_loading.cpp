@@ -134,6 +134,7 @@ namespace nova {
             fill_field(item.first, definition_map, &material::back_face);
             fill_field(item.first, definition_map, &material::input_textures);
             fill_field(item.first, definition_map, &material::output_textures);
+            fill_field(item.first, definition_map, &material::depth_texture);
             fill_field(item.first, definition_map, &material::filters);
             fill_field(item.first, definition_map, &material::fallback);
             fill_field(item.first, definition_map, &material::depth_bias);

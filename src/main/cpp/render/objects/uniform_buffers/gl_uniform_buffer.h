@@ -18,7 +18,7 @@ namespace nova {
     template <typename T>
     class gl_uniform_buffer {
     public:
-        gl_uniform_buffer(std::string name) : name(name) {
+        explicit gl_uniform_buffer(std::string name) : name(name) {
             glCreateBuffers(1, &gl_name);
             LOG(TRACE) << "creating ubo " << name << " with size: " << sizeof(T);
             glNamedBufferStorage(gl_name, sizeof(T), nullptr, GL_DYNAMIC_STORAGE_BIT);
@@ -32,8 +32,8 @@ namespace nova {
             old.name = "";
         }
 
-        void link_to_shader(const gl_shader_program &shader) {
-            auto ubo_index = glGetUniformBlockIndex(shader.gl_name, name.c_str());
+        void link_to_shader(const std::shared_ptr<gl_shader_program> shader) {
+            auto ubo_index = glGetUniformBlockIndex(shader->gl_name, name.c_str());
             glBindBuffer(GL_UNIFORM_BUFFER, gl_name);
             glBindBufferBase(GL_UNIFORM_BUFFER, ubo_index, gl_name);
         }

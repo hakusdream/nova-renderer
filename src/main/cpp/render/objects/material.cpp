@@ -112,6 +112,8 @@ namespace nova {
             return vec;
         });
 
+        depth_texture = get_json_value<bound_resource>(pass_json, "depthTexture", decode_bound_texture);
+
         alpha_src = get_json_value<blend_factor_enum>(pass_json, "alphaSrc", blend_factor_enum::from_string);
         alpha_dst = get_json_value<blend_factor_enum>(pass_json, "alphaDst", blend_factor_enum::from_string);
         depth_func = get_json_value<compare_op>(pass_json, "depthFunc", compare_op::from_string);

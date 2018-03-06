@@ -92,6 +92,7 @@ namespace nova {
     }
 
     void nova_renderer::execute_pass(const render_pass &pass) {
+        LOG(DEBUG) << "Rendering pass " << pass.name;
         const auto& materials = materials_by_pass[pass.name];
         for(const auto& mat : materials) {
             render_geometry_for_material(mat);
@@ -130,6 +131,12 @@ namespace nova {
                 const auto& texture = textures->get_texture(texture_binding.name);
                 gl_context.bind_texture(texture, texture_binding.binding);
             }
+        }
+
+        if(framebuffers_by_material.find(mat.name) != framebuffers_by_material.end()) {
+            framebuffers_by_material[mat.name].bind();
+        } else {
+            LOG(WARNING) << "No framebuffer for material " << mat.name;
         }
 
         gl_context.commit();
@@ -284,13 +291,10 @@ namespace nova {
         LOG(INFO) << "Building framebuffers...";
         create_framebuffers_from_shaderpack();
 
+        LOG(INFO) << "Wiring renderer together...";
+        link_up_uniform_buffers(materials_by_pass, *ubo_manager);
 
-
-		/*
-        link_up_uniform_buffers(loaded_shaderpack->get_loaded_shaders(), *ubo_manager);
-        LOG(DEBUG) << "Linked up UBOs";
-
-        */
+        LOG(INFO) << "Loaded shaderpack " << new_shaderpack_name;
     }
 
     void nova_renderer::create_framebuffers_from_shaderpack() {
@@ -306,6 +310,20 @@ namespace nova {
 
     framebuffer nova_renderer::make_framebuffer_for_material(const material &mat) {
         auto fb = framebuffer();
+
+        if(mat.output_textures) {
+            for(const auto &output : mat.output_textures.value()) {
+                const auto& output_tex = textures->get_texture(output.name);
+                fb.add_color_attachment(output.binding, output_tex.get_gl_name());
+            }
+        }
+
+        if(mat.depth_texture) {
+            const auto& depth = mat.depth_texture.value();
+            const auto& depth_tex = textures->get_texture(depth.name);
+            fb.set_depth_buffer(depth_tex.get_gl_name());
+        }
+
         return fb;
     }
 
@@ -412,8 +430,8 @@ namespace nova {
         return ordered_passes;
     }
 
-    void link_up_uniform_buffers(std::unordered_map<std::string, gl_shader_program> &shaders, uniform_buffer_store &ubos) {
-        nova::foreach(shaders, [&](auto shader) { ubos.register_all_buffers_with_shader(shader.second); });
+    void link_up_uniform_buffers(std::unordered_map<std::string, material> &materials, uniform_buffer_store &ubos) {
+        nova::foreach(materials, [&](auto mat) { ubos.register_all_buffers_with_shader(mat.second.program); });
     }
 
     std::string translate_debug_source(GLenum source) {
