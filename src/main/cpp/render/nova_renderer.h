@@ -166,6 +166,8 @@ namespace nova {
         void execute_pass(const render_pass &pass);
 
         framebuffer make_framebuffer_for_material(const material& mat);
+
+        void set_up_blending(const material &mat);
     };
 
     /*!

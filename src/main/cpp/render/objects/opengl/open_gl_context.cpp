@@ -64,7 +64,7 @@ namespace nova {
         }
     }
 
-    void open_gl_context::set_stencil_func_separate(int face, GLenum compare_op, int reference, int mask) {
+    void open_gl_context::set_stencil_func_separate(int face, int compare_op, int reference, int mask) {
         if(face == GL_FRONT || face == GL_FRONT_AND_BACK) {
             next_state.frontface_state.compare_op = compare_op;
             next_state.frontface_state.reference = reference;
@@ -102,6 +102,11 @@ namespace nova {
             } else {
                 glDisable(GL_BLEND);
             }
+        }
+
+        if(next_state.src_color != current_state.src_color || next_state.dst_color != current_state.dst_color
+           || next_state.src_alpha != current_state.src_alpha || next_state.dst_alpha != current_state.dst_alpha) {
+            glBlendFuncSeparate(next_state.src_color, next_state.dst_color, next_state.src_alpha, next_state.dst_alpha);
         }
 
         if(next_state.is_culling_eanbled != current_state.is_culling_eanbled) {
@@ -181,5 +186,24 @@ namespace nova {
         for(const auto& bound_texture : next_state.bound_textures) {
             glBindTextureUnit(bound_texture.first, bound_texture.second);
         }
+
+        if(next_state.drawbuffer != current_state.drawbuffer) {
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, next_state.drawbuffer);
+        }
+
+
+        current_state = next_state;
+        next_state = {};
+    }
+
+    void open_gl_context::set_framebuffer(const framebuffer &fb) {
+        next_state.drawbuffer = fb.get_gl_name();
+    }
+
+    void open_gl_context::set_blending_params(GLenum src_color, GLenum dst_color, GLenum src_alpha, GLenum dst_alpha) {
+        next_state.src_color = src_color;
+        next_state.dst_color = dst_color;
+        next_state.src_alpha = src_alpha;
+        next_state.dst_alpha = dst_alpha;
     }
 }

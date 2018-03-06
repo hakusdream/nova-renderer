@@ -57,13 +57,13 @@ namespace nova {
         }
     }
 
-    void framebuffer::bind() {
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer_id);
-    }
-
     void framebuffer::generate_mipmaps() {
         for(const auto &item : color_attachments_map) {
             glGenerateTextureMipmap(item.second);
         }
+    }
+
+    GLuint framebuffer::get_gl_name() const {
+        return framebuffer_id;
     }
 }

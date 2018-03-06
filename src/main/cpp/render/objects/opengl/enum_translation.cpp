@@ -53,4 +53,32 @@ namespace nova {
                 return 0;
         }
     }
+
+    GLenum blend_factor_to_gl(const blend_factor_enum &blend_fac) {
+        switch(blend_fac) {
+            case blend_factor_enum::One:
+                return GL_ONE;
+            case blend_factor_enum::Zero:
+                return GL_ZERO;
+            case blend_factor_enum::SrcColor:
+                return GL_SRC_COLOR;
+            case blend_factor_enum::DstColor:
+                return GL_DST_COLOR;
+            case blend_factor_enum::OneMinusSrcColor:
+                return GL_ONE_MINUS_SRC_COLOR;
+            case blend_factor_enum::OneMinusDstColor:
+                return GL_ONE_MINUS_DST_COLOR;
+            case blend_factor_enum::SrcAlpha:
+                return GL_SRC_ALPHA;
+            case blend_factor_enum::DstAlpha:
+                return GL_DST_ALPHA;
+            case blend_factor_enum::OneMinusSrcAlpha:
+                return GL_ONE_MINUS_SRC_ALPHA;
+            case blend_factor_enum::OneMinusDstAlpha:
+                return GL_ONE_MINUS_DST_ALPHA;
+            default:
+                LOG(WARNING) << "No conversion into an OpenGL constant for blend factor " << blend_factor_enum::to_string(blend_fac);
+                return GL_ZERO;
+        }
+    }
 }

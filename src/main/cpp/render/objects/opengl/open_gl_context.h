@@ -8,6 +8,8 @@
 
 #include <unordered_map>
 #include "../textures/texture2D.h"
+#include "../framebuffer.h"
+#include "../material.h"
 
 namespace nova {
     struct stencil_test_state {
@@ -25,6 +27,10 @@ namespace nova {
      */
     struct opengl_state {
         bool is_blending_enabled;
+        GLenum src_color;
+        GLenum dst_color;
+        GLenum src_alpha;
+        GLenum dst_alpha;
 
         bool is_culling_eanbled;
         GLenum culling_mode;
@@ -42,6 +48,7 @@ namespace nova {
         bool is_alpha_to_coverage_enabled;
 
         std::unordered_map<GLuint, GLuint> bound_textures;
+        GLuint drawbuffer;
     };
 
     /*!
@@ -82,6 +89,8 @@ namespace nova {
          * \param enabled If true, enables blending. If false, does not
          */
         void set_blending_enabled(bool enabled);
+
+        void set_blending_params(GLenum src_color, GLenum dst_color, GLenum src_alpha, GLenum dst_alpha);
 
         /*!
          * \brief Sets face culling to be either enabled or disabled
@@ -141,7 +150,7 @@ namespace nova {
          * \param reference The reference value to compare the stencil buffer value against
          * \param mask A bitwise mask to apply to both the stencil buffer value and the reference value
          */
-        void set_stencil_func_separate(int face, GLenum compare_op, int reference, int mask);
+        void set_stencil_func_separate(int face, int compare_op, int reference, int mask);
 
         /*!
          * \brief Sets whether writing to the color buffer is enabled or not
@@ -169,7 +178,10 @@ namespace nova {
          */
         void bind_texture(const texture2D &texture, uint32_t texture_unit);
 
+        void set_framebuffer(const framebuffer &fb);
+
         void commit();
+
     private:
         opengl_state current_state;
         opengl_state next_state;

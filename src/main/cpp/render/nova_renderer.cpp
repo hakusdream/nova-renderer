@@ -134,9 +134,13 @@ namespace nova {
         }
 
         if(framebuffers_by_material.find(mat.name) != framebuffers_by_material.end()) {
-            framebuffers_by_material[mat.name].bind();
+            gl_context.set_framebuffer(framebuffers_by_material[mat.name]);
         } else {
             LOG(WARNING) << "No framebuffer for material " << mat.name;
+        }
+
+        if(mat.source_blend_factor || mat.destination_blend_factor || mat.alpha_src || mat.alpha_dst) {
+            set_up_blending(mat);
         }
 
         gl_context.commit();
@@ -173,6 +177,28 @@ namespace nova {
             }
 
         gl_context.set_stencil_func_separate(face, compare_op, 0, stencil_mask);
+    }
+
+    void nova_renderer::set_up_blending(const material &mat) {
+        GLenum src_color_factor = GL_ZERO;
+        GLenum dst_color_factor = GL_ONE;
+        GLenum src_alpha_factor = GL_ZERO;
+        GLenum dst_alpha_factor = GL_ONE;
+
+        if(mat.source_blend_factor) {
+            src_color_factor = blend_factor_to_gl(mat.source_blend_factor.value());
+        }
+        if(mat.destination_blend_factor) {
+            dst_color_factor = blend_factor_to_gl(mat.destination_blend_factor.value());
+        }
+        if(mat.alpha_src) {
+            src_alpha_factor = blend_factor_to_gl(mat.alpha_src.value());
+        }
+        if(mat.alpha_dst) {
+            dst_alpha_factor = blend_factor_to_gl(mat.alpha_dst.value());
+        }
+
+        gl_context.set_blending_params(src_color_factor, dst_color_factor, src_alpha_factor, dst_alpha_factor);
     }
 
     void nova_renderer::enable_state(const state_enum &state) {

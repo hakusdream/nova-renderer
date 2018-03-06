@@ -29,11 +29,11 @@ namespace nova {
 
         void add_color_attachment(GLuint binding, GLuint tex_name);
 
-        void bind();
-
         void generate_mipmaps();
 
         void set_depth_buffer(GLuint depth_buffer);
+
+        GLuint get_gl_name() const;
 
     private:
         GLuint framebuffer_id;
@@ -50,8 +50,6 @@ namespace nova {
 
         GLuint* color_attachments;
         bool has_depth_buffer = false;
-
-        framebuffer(unsigned int width, unsigned int height, unsigned int num_color_attachments);
 
         void check_status();
     };

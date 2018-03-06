@@ -24,6 +24,8 @@ namespace nova {
      * \return
      */
     GLenum compare_op_to_gl(const compare_op &op);
+
+    GLenum blend_factor_to_gl(const blend_factor_enum &blend_fac);
 }
 
 
