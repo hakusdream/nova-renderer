@@ -136,18 +136,11 @@ namespace nova {
          */
         void create_framebuffers_from_shaderpack();
 
-        /*!
-         * \brief Renders all the geometry that uses the specified shader, setting up textures and whatnot
-         *
-         * \param shader The shader to render things with
-         */
-        void render_shader(gl_shader_program& shader);
-
         inline void upload_gui_model_matrix(gl_shader_program &program);
 
-        void upload_model_matrix(render_object &geom, gl_shader_program &program) const;
+        void upload_model_matrix(const render_object &geom, std::shared_ptr<gl_shader_program> program) const;
 
-        void update_gbuffer_ubos();
+        void update_per_frame_ubos();
 
         void render_geometry_for_material(const material &mat);
 

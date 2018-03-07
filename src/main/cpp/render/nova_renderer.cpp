@@ -71,6 +71,8 @@ namespace nova {
         // Make geometry for any new chunks
         meshes->upload_new_geometry();
 
+        update_per_frame_ubos();
+
         for(const auto& pass : passes_list) {
             execute_pass(pass);
         }
@@ -103,7 +105,16 @@ namespace nova {
         LOG(TRACE) << "Rendering material " << mat.name;
 
         set_opengl_state_for_material(mat);
+        LOG(TRACE) << "Set OpenGL state for material";
 
+        const auto& meshes_for_mat = meshes->get_meshes_for_shader(mat.name);
+        for(const auto& geom : meshes_for_mat) {
+            if(geom.geometry->has_data()) {
+                upload_model_matrix(geom, mat.program);
+                geom.geometry->set_active();
+                geom.geometry->draw();
+            }
+        }
 
     }
 
@@ -382,58 +393,10 @@ namespace nova {
         instance.release();
     }
 
-    void nova_renderer::render_shader(gl_shader_program &shader) {
-        /*LOG(TRACE) << "Rendering everything for shader " << shader.get_name();
-        profiler::start(shader.get_name());
-        shader.bind();
-
-        profiler::start("get_meshes_for_shader");
-        auto& geometry = meshes->get_meshes_for_shader(shader.get_name());
-        profiler::end("get_meshes_for_shader");
-        profiler::start("process_all");
-        for(auto& geom : geometry) {
-            profiler::start("process_renderable");
-
-            // if(!player_camera.has_object_in_frustum(geom.bounding_box)) {
-            //     continue;
-            // }
-
-            if(geom.geometry->has_data()) {
-                if(!geom.color_texture.empty()) {
-                    auto color_texture = textures->get_texture(geom.color_texture);
-                    color_texture.bind(0);
-                }
-
-                if(geom.normalmap) {
-                    textures->get_texture(*geom.normalmap).bind(1);
-                }
-
-                if(geom.data_texture) {
-                    textures->get_texture(*geom.data_texture).bind(2);
-                }
-
-                textures->get_texture("lightmap").bind(3);
-
-                upload_model_matrix(geom, shader);
-
-                profiler::start("drawcall");
-                geom.geometry->set_active();
-                geom.geometry->draw();
-                profiler::end("drawcall");
-            } else {
-                LOG(TRACE) << "Skipping some geometry since it has no data";
-            }
-            profiler::end("process_renderable");
-        }
-        profiler::end("process_all");
-
-        profiler::end(shader.get_name());*/
-    }
-
-    inline void nova_renderer::upload_model_matrix(render_object &geom, gl_shader_program &program) const {
+    inline void nova_renderer::upload_model_matrix(const render_object &geom, std::shared_ptr<gl_shader_program> program) const {
         glm::mat4 model_matrix = glm::translate(glm::mat4(1), geom.position);
 
-        auto model_matrix_location = program.get_uniform_location("gbufferModel");
+        auto model_matrix_location = program->get_uniform_location("gbufferModel");
         glUniformMatrix4fv(model_matrix_location, 1, GL_FALSE, &model_matrix[0][0]);
     }
 
@@ -454,7 +417,7 @@ namespace nova {
         glUniformMatrix4fv(model_matrix_location, 1, GL_FALSE, &gui_model[0][0]);
     }
 
-    void nova_renderer::update_gbuffer_ubos() {
+    void nova_renderer::update_per_frame_ubos() {
         // Big thing here is to update the camera's matrices
 
         auto& per_frame_ubo = ubo_manager->get_per_frame_uniforms();
