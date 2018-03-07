@@ -444,8 +444,12 @@ namespace nova {
         return ordered_passes;
     }
 
-    void link_up_uniform_buffers(std::unordered_map<std::string, material> &materials, uniform_buffer_store &ubos) {
-        nova::foreach(materials, [&](auto mat) { ubos.register_all_buffers_with_shader(mat.second.program); });
+    void link_up_uniform_buffers(std::unordered_map<std::string, std::vector<material>> &materials, uniform_buffer_store &ubos) {
+        for(const auto& item : materials) {
+            for(const auto& mat : item.second) {
+                ubos.register_all_buffers_with_shader(mat.program);
+            }
+        }
     }
 
     std::string translate_debug_source(GLenum source) {

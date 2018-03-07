@@ -122,7 +122,7 @@ namespace nova {
         camera player_camera;
 
         std::vector<render_pass> passes_list;
-        std::unordered_map<std::string, std::vector<material>> materials_by_pass
+        std::unordered_map<std::string, std::vector<material>> materials_by_pass;
         std::unordered_map<std::string, framebuffer> framebuffers_by_material;
 
         void enable_debug();
@@ -167,7 +167,7 @@ namespace nova {
      */
     std::vector<render_pass> compile_into_list(std::unordered_map<std::string, render_pass> passes);
 
-    void link_up_uniform_buffers(std::unordered_map<std::string, material> &materials, uniform_buffer_store &ubos);
+    void link_up_uniform_buffers(std::unordered_map<std::string, std::vector<material>> &materials, uniform_buffer_store &ubos);
 }
 
 #endif //RENDERER_VULKAN_MOD_H

@@ -17,7 +17,7 @@ namespace nova {
         color_attachments_map[binding] = tex_name;
     }
 
-    framebuffer::framebuffer(framebuffer &&other) {
+    framebuffer::framebuffer(framebuffer &&other) noexcept {
         framebuffer_id = other.framebuffer_id;
         other.framebuffer_id = 0;
     }
@@ -65,5 +65,16 @@ namespace nova {
 
     GLuint framebuffer::get_gl_name() const {
         return framebuffer_id;
+    }
+
+    framebuffer& framebuffer::operator=(framebuffer &&other) noexcept {
+        framebuffer_id = other.framebuffer_id;
+        color_attachments_map = std::move(other.color_attachments_map);
+        has_depth_buffer = other.has_depth_buffer;
+
+        other.framebuffer_id = 0;
+        other.has_depth_buffer = false;
+
+        return *this;
     }
 }

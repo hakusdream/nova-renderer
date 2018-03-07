@@ -25,6 +25,8 @@ namespace nova {
 
         framebuffer(framebuffer &&other) noexcept;
 
+        framebuffer& operator=(framebuffer&& other) noexcept;
+
         ~framebuffer();
 
         void add_color_attachment(GLuint binding, GLuint tex_name);
@@ -46,9 +48,6 @@ namespace nova {
          */
         std::unordered_map<int, GLuint> color_attachments_map;
 
-        std::set<GLenum> drawbuffers;
-
-        GLuint* color_attachments;
         bool has_depth_buffer = false;
 
         void check_status();
