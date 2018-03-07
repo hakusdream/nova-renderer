@@ -346,7 +346,7 @@ public class NovaRenderer implements IResourceManagerReloadListener {
             this.scalefactor = scalefactor;
         }
 
-        printProfilerData();
+        //printProfilerData();
     }
 
     private void sendLightmapTexture(DynamicTexture lightmapTexture) {

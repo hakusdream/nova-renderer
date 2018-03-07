@@ -65,6 +65,7 @@ namespace nova {
     }
 
     void nova_renderer::render_frame() {
+        LOG(WARNING) << "Rendering frame";
         profiler::log_all_profiler_data();
         player_camera.recalculate_frustum();
 
@@ -73,6 +74,7 @@ namespace nova {
 
         update_per_frame_ubos();
 
+        LOG(WARNING) << "Rendering " << passes_list.size() << " passes";
         for(const auto& pass : passes_list) {
             execute_pass(pass);
         }
@@ -169,10 +171,21 @@ namespace nova {
             }
         }
 
-        if(framebuffers_by_material.find(mat.name) != framebuffers_by_material.end()) {
-            gl_context.set_framebuffer(framebuffers_by_material[mat.name]);
+        const auto& outputs = mat.output_textures.value();
+        bool draws_to_backbuffer = false;
+        for(const auto& output : outputs) {
+            if(output.name == "Backbuffer") {
+                draws_to_backbuffer = true;
+            }
+        }
+        if(draws_to_backbuffer) {
+            gl_context.set_framebuffer(0);
         } else {
-            LOG(WARNING) << "No framebuffer for material " << mat.name;
+            if(framebuffers_by_material.find(mat.name) != framebuffers_by_material.end()) {
+                gl_context.set_framebuffer(framebuffers_by_material[mat.name].get_gl_name());
+            } else {
+                LOG(WARNING) << "No framebuffer for material " << mat.name;
+            }
         }
 
         if(mat.source_blend_factor || mat.destination_blend_factor || mat.alpha_src || mat.alpha_dst) {
@@ -375,6 +388,10 @@ namespace nova {
 
         if(mat.output_textures) {
             for(const auto &output : mat.output_textures.value()) {
+                if(output.name == "Backbuffer") {
+                    // The backbuffer just exists,
+                    continue;
+                }
                 const auto& output_tex = textures->get_texture(output.name);
                 fb.add_color_attachment(output.binding, output_tex.get_gl_name());
             }

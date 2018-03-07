@@ -184,7 +184,7 @@ namespace nova {
          */
         void bind_texture(const texture2D &texture, uint32_t texture_unit);
 
-        void set_framebuffer(const framebuffer &fb);
+        void set_framebuffer(GLuint fb);
 
         void commit();
 

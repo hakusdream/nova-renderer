@@ -212,8 +212,8 @@ namespace nova {
         next_state.depth_func = depth_func;
     }
 
-    void open_gl_context::set_framebuffer(const framebuffer &fb) {
-        next_state.drawbuffer = fb.get_gl_name();
+    void open_gl_context::set_framebuffer(GLuint fb) {
+        next_state.drawbuffer = fb;
     }
 
     void open_gl_context::set_blending_params(GLenum src_color, GLenum dst_color, GLenum src_alpha, GLenum dst_alpha) {
