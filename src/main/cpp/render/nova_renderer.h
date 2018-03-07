@@ -119,14 +119,6 @@ namespace nova {
 
         open_gl_context gl_context;
 
-        std::vector<GLuint> shadow_depth_textures;
-        std::unique_ptr<framebuffer> shadow_framebuffer;
-        framebuffer_builder shadow_framebuffer_builder;
-
-        std::unique_ptr<framebuffer> main_framebuffer;
-        std::vector<GLuint> gbuffer_depth_textures;
-        framebuffer_builder main_framebuffer_builder;
-
         camera player_camera;
 
         std::vector<render_pass> passes_list;
@@ -161,13 +153,15 @@ namespace nova {
 
         void enable_state(const state_enum &state);
 
-        void set_up_stencil_test(GLenum face, const stencil_op_state &front_face_stencil);
+        void set_up_stencil_test(GLenum face, const stencil_op_state &front_face_stencil, uint32_t ref);
 
         void execute_pass(const render_pass &pass);
 
         framebuffer make_framebuffer_for_material(const material& mat);
 
         void set_up_blending(const material &mat);
+
+        void set_opengl_state_for_material(const material &mat);
     };
 
     /*!

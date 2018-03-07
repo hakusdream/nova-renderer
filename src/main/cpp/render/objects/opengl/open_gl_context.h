@@ -35,6 +35,9 @@ namespace nova {
         bool is_culling_eanbled;
         GLenum culling_mode;
 
+        GLenum depth_func;
+        float polygon_offset_factor;
+        float polygon_offset_units;
         bool is_depth_write_enabled;
         bool is_depth_test_enabled;
         bool is_stencil_write_enabled;
@@ -49,6 +52,7 @@ namespace nova {
 
         std::unordered_map<GLuint, GLuint> bound_textures;
         GLuint drawbuffer;
+        GLuint program;
     };
 
     /*!
@@ -170,6 +174,8 @@ namespace nova {
          */
         void set_alpha_to_coverage_enabled(bool enabled);
 
+        void set_shader(GLuint program);
+
         /*!
          * \brief Binds a texture to a texture unit
          *
@@ -181,6 +187,10 @@ namespace nova {
         void set_framebuffer(const framebuffer &fb);
 
         void commit();
+
+        void set_depth_func(GLenum depth_func);
+
+        void set_polygon_offset(float factor, float units);
 
     private:
         opengl_state current_state;

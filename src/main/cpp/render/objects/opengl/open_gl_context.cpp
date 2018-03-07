@@ -133,6 +133,15 @@ namespace nova {
             }
         }
 
+        if(next_state.depth_func != current_state.depth_func) {
+            glDepthFunc(next_state.depth_func);
+        }
+
+        if(next_state.polygon_offset_factor != current_state.polygon_offset_factor
+           || next_state.polygon_offset_units != current_state.polygon_offset_units) {
+            glPolygonOffset(next_state.polygon_offset_factor, next_state.polygon_offset_units);
+        }
+
         if(next_state.is_stencil_write_enabled != current_state.is_stencil_write_enabled) {
             glStencilMask(next_state.is_stencil_write_enabled ? 0xFFFFFFFF : 0);
         }
@@ -183,6 +192,10 @@ namespace nova {
             }
         }
 
+        if(next_state.program != current_state.program) {
+            glUseProgram(next_state.program);
+        }
+
         for(const auto& bound_texture : next_state.bound_textures) {
             glBindTextureUnit(bound_texture.first, bound_texture.second);
         }
@@ -191,9 +204,12 @@ namespace nova {
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, next_state.drawbuffer);
         }
 
-
         current_state = next_state;
         next_state = {};
+    }
+
+    void open_gl_context::set_depth_func(GLenum depth_func) {
+        next_state.depth_func = depth_func;
     }
 
     void open_gl_context::set_framebuffer(const framebuffer &fb) {
@@ -205,5 +221,14 @@ namespace nova {
         next_state.dst_color = dst_color;
         next_state.src_alpha = src_alpha;
         next_state.dst_alpha = dst_alpha;
+    }
+
+    void open_gl_context::set_shader(GLuint program) {
+        next_state.program = program;
+    }
+
+    void open_gl_context::set_polygon_offset(float factor, float units) {
+        next_state.polygon_offset_factor = factor;
+        next_state.polygon_offset_units = units;
     }
 }

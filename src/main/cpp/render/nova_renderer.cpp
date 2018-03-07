@@ -102,10 +102,12 @@ namespace nova {
     void nova_renderer::render_geometry_for_material(const material &mat) {
         LOG(TRACE) << "Rendering material " << mat.name;
 
-        // Setting the default state at the start of each pass will have some performance hit, especially if there's a
-        // lot of passes that use a lot of states... but from what I've seen of Bedrock materials only a couple of
-        // states are used by each pass, so I don't expect a huge performance hit. However, this could be a good place
-        // to optimize if GL calls are taking too much time
+        set_opengl_state_for_material(mat);
+
+
+    }
+
+    void nova_renderer::set_opengl_state_for_material(const material &mat) {
         gl_context.set_default_state();
 
         if(mat.states) {
@@ -114,17 +116,40 @@ namespace nova {
             }
         }
 
+        uint32_t stencil_ref = 0;
+        if(mat.stencil_ref) {
+            stencil_ref = mat.stencil_ref.value();
+        }
+
         if(mat.front_face) {
             gl_context.set_stencil_test_enabled(true);
             const auto& front_face_stencil = mat.front_face.value();
-            set_up_stencil_test(GL_FRONT, front_face_stencil);
+            set_up_stencil_test(GL_FRONT, front_face_stencil, stencil_ref);
         }
 
         if(mat.back_face) {
             gl_context.set_stencil_test_enabled(true);
             const auto& back_face_stencil = mat.back_face.value();
-            set_up_stencil_test(GL_BACK, back_face_stencil);
+            set_up_stencil_test(GL_BACK, back_face_stencil, stencil_ref);
         }
+
+        if(mat.depth_func) {
+            gl_context.set_depth_func(compare_op_to_gl(mat.depth_func.value()));
+        }
+
+        if(mat.depth_bias || mat.slope_scaled_depth_bias) {
+            float units = 0;
+            float factor = 0;
+            if(mat.depth_bias) {
+                units = mat.depth_bias.value();
+            }
+            if(mat.slope_scaled_depth_bias) {
+                factor = mat.slope_scaled_depth_bias.value();
+            }
+            gl_context.set_polygon_offset(factor, units);
+        }
+
+        gl_context.set_shader(mat.program->gl_name);
 
         if(mat.input_textures) {
             for(const auto& texture_binding : mat.input_textures.value()) {
@@ -146,7 +171,7 @@ namespace nova {
         gl_context.commit();
     }
 
-    void nova_renderer::set_up_stencil_test(const GLenum face, const stencil_op_state &front_face_stencil) {
+    void nova_renderer::set_up_stencil_test(const GLenum face, const stencil_op_state &front_face_stencil, const uint32_t ref) {
         auto fail_op = GL_KEEP;
         auto pass_op = GL_KEEP;
         auto depth_fail_op = GL_KEEP;
@@ -176,7 +201,7 @@ namespace nova {
                 stencil_mask &= front_face_stencil.write_mask.value();
             }
 
-        gl_context.set_stencil_func_separate(face, compare_op, 0, stencil_mask);
+        gl_context.set_stencil_func_separate(face, compare_op, ref, stencil_mask);
     }
 
     void nova_renderer::set_up_blending(const material &mat) {
