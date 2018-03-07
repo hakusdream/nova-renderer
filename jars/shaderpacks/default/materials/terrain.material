@@ -3,7 +3,7 @@
         "pass": "forward",
 
         "vertexShader": "gbuffers_terrain",
-        "fragmentShader": "gubffers_terrain",
+        "fragmentShader": "gbuffers_terrain",
 
         "vertexFields": [
             {

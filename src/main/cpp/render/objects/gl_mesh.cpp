@@ -9,7 +9,7 @@
 #include "../windowing/glfw_gl_window.h"
 
 namespace nova {
-    gl_mesh::gl_mesh() : vertex_array(0), vertex_buffer(0), indices(0), num_indices(0) {
+    gl_mesh::gl_mesh() : vertex_buffer(0), indices(0), vertex_array(0), num_indices(0) {
         create();
     }
 

@@ -34,6 +34,7 @@ namespace nova {
         std::string accum;
 
         while(getline(stream, buf)) {
+            LOG(TRACE) << buf;
             auto slash_pos = buf.find("//");
             if(slash_pos != std::string::npos) {
                 LOG(DEBUG) << "Removing comment after character " << slash_pos << " in " << buf;

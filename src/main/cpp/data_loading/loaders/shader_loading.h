@@ -87,7 +87,7 @@ namespace nova {
 
     std::vector<material> read_material_files(const fs::path& shaderpack_path);
 
-    std::vector<material> parse_materials_from_json(const nlohmann::json &shaders_json);
+    std::vector<material> parse_materials_from_json(const nlohmann::json &materials_json);
 
     /*!
      * \brief Parses a list of texture resource definitions from the provided JSON array
@@ -110,11 +110,11 @@ namespace nova {
      * This will only work if the shaderpack is a folder. If the shaderpack is a zip folder, this will probably fail
      * in a way I didn't explicitly anticipate
      *
-     * \param shaderpack_name The name of the shaderpack to load the shaders from
+     * \param shaders_path The name of the shaderpack to load the shaders from
      * \param passes The list of names of shaders to load
      * \return The loaded shaderpack
      */
-    std::unordered_map<std::string, shader_definition> load_sources_from_folder(const fs::path &shaderpack_name, const std::vector<material> &passes);
+    std::unordered_map<std::string, shader_definition> load_sources_from_folder(const fs::path &shaders_path, const std::vector<material> &passes);
 
     /*!
      * \brief Extracts the filename from the #include line

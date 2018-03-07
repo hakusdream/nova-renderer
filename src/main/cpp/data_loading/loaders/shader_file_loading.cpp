@@ -135,17 +135,17 @@ namespace nova {
     fs::path get_included_file_path(const fs::path &shader_path, const fs::path &included_file_name);
 
     std::unordered_map<std::string, std::vector<material>> load_materials_from_folder(const fs::path &shaderpack_path) {
-        std::vector<material> passes = read_material_files(shaderpack_path);
-        if(passes.empty()) {
-            LOG(WARNING) << "No passes defined by shaderpack. Attempting to guess the intended shaderpack format";
+        std::vector<material> materials = read_material_files(shaderpack_path);
+        if(materials.empty()) {
+            LOG(WARNING) << "No materials defined by shaderpack. Attempting to guess the intended shaderpack format";
 
             auto files = get_shader_names_in_folder(shaderpack_path / "shaders");
 
             if(contains_bedrock_files(files)) {
-                passes = parse_materials_from_json(get_default_bedrock_passes());
+                materials = parse_materials_from_json(get_default_bedrock_passes());
 
             } else if(contains_optifine_files(files)) {
-                passes = parse_materials_from_json(get_default_optifine_passes());
+                materials = parse_materials_from_json(get_default_optifine_passes());
 
             } else {
                 LOG(FATAL) << "Cannot work with the format of this shaderpack. Please chose another one and try again";
@@ -157,10 +157,10 @@ namespace nova {
         }
 
         LOG(INFO) << "Reading shaders from disk";
-        auto sources = load_sources_from_folder(shaderpack_path, passes);
+        auto sources = load_sources_from_folder(shaderpack_path / "shaders", materials);
 
         LOG(INFO) << "Compiling shaders";
-        for(auto& pass : passes) {
+        for(auto& pass : materials) {
             // TODO: Multithreaded shader compilation
             pass.program = std::make_shared<gl_shader_program>(sources[pass.name]);
 
@@ -169,7 +169,7 @@ namespace nova {
 
         auto materials_by_pass = std::unordered_map<std::string, std::vector<material>>{};
 
-        for(const auto& mat : passes) {
+        for(const auto& mat : materials) {
             materials_by_pass[mat.pass.value()].push_back(mat);
         }
 
@@ -179,13 +179,16 @@ namespace nova {
     std::vector<material> read_material_files(const fs::path& shaderpack_path) {
         auto materials_path = shaderpack_path / "materials";
         if(materials_path.empty()) {
+            LOG(WARNING) << "No materials found at path " << materials_path << ", returning empty";
             return {};
         }
         auto materials = std::vector<material>{};
         auto materials_itr = fs::directory_iterator(materials_path);
 
         for(const auto &item : materials_itr) {
+            LOG(TRACE) << "Examing file " << item.path();
             if(item.path().extension() != ".material") {
+                LOG(WARNING) << "Skipping non-material file";
                 continue;
             }
             // I do like using temporary variables for everything...
@@ -219,7 +222,7 @@ namespace nova {
         return filenames;
     }
 
-    std::unordered_map<std::string, shader_definition> load_sources_from_folder(const fs::path &shaderpack_name, const std::vector<material> &passes) {
+    std::unordered_map<std::string, shader_definition> load_sources_from_folder(const fs::path &shaders_path, const std::vector<material> &passes) {
         std::unordered_map<std::string, shader_definition> sources;
 
         for(const auto& mat : passes) {
@@ -230,18 +233,18 @@ namespace nova {
             if(!mat.vertex_shader) {
                 LOG(ERROR) << "No vertex shader set for pass " << mat.name << "! Make sure that this pass or one of its parents sets the vertex shader";
             } else {
-                shader_lines.vertex_source = load_shader_file(shaderpack_name / mat.vertex_shader.value(), vertex_extensions);
+                shader_lines.vertex_source = load_shader_file(shaders_path / mat.vertex_shader.value(), vertex_extensions);
             }
 
             if(!mat.fragment_shader) {
                 LOG(ERROR) << "No fragment shader set for pass " << mat.name << "! Make sure that this pass or one of its parents sets the fragment shader";
             } else {
-                shader_lines.fragment_source = load_shader_file(shaderpack_name / mat.fragment_shader.value(), fragment_extensions);
+                shader_lines.fragment_source = load_shader_file(shaders_path / mat.fragment_shader.value(), fragment_extensions);
             }
 
             // Check if we have geometry or tessellation shaders
             if(mat.geometry_shader) {
-                shader_lines.geometry_source = load_shader_file(shaderpack_name / mat.geometry_shader.value(), geometry_extensions);
+                shader_lines.geometry_source = load_shader_file(shaders_path / mat.geometry_shader.value(), geometry_extensions);
             }
 
             if(mat.tessellation_control_shader && !mat.tessellation_evaluation_shader) {
@@ -251,8 +254,8 @@ namespace nova {
                 LOG(WARNING) << "You've set a tessellation evaluation shader but not a control shader. You need both for this pass to perform tessellation, so Nova will not perform tessellation for this pass";
 
             } else {
-                shader_lines.tessellation_evaluation_source = load_shader_file(shaderpack_name / mat.tessellation_evaluation_shader.value(), tess_eval_extensions);
-                shader_lines.tessellation_control_source = load_shader_file(shaderpack_name / mat.tessellation_control_shader.value(), tess_control_extensions);
+                shader_lines.tessellation_evaluation_source = load_shader_file(shaders_path / mat.tessellation_evaluation_shader.value(), tess_eval_extensions);
+                shader_lines.tessellation_control_source = load_shader_file(shaders_path / mat.tessellation_control_shader.value(), tess_control_extensions);
             }
         }
 

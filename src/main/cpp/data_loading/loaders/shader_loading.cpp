@@ -90,10 +90,12 @@ namespace nova {
         fill_in_material_state_field<Type>(name, materials, [ptr](material& s) -> optional<Type>&{ return s.*ptr; });
     }
 
-    std::vector<material> parse_materials_from_json(const nlohmann::json &shaders_json) {
+    std::vector<material> parse_materials_from_json(const nlohmann::json &materials_json) {
+        LOG(DEBUG) << "About to parse " << materials_json.size() << " materials";
         std::unordered_map<std::string, material> definition_map;
-        for(auto itr = shaders_json.begin(); itr != shaders_json.end(); ++itr) {
+        for(auto itr = materials_json.begin(); itr != materials_json.end(); ++itr) {
             auto material_state_name = itr.key();
+            LOG(TRACE) << "Handling material " << material_state_name;
             auto json_node = itr.value();
             optional<std::string> parent_state_name = optional<std::string>{};
 
@@ -118,6 +120,8 @@ namespace nova {
 
             if(!cur_state.parent_name) {
                 // No parent? I guess we get what we have then
+
+                materials.push_back(cur_state);
                 continue;
             }
 
@@ -179,7 +183,7 @@ namespace nova {
         }
 
         return textures;
-    };
+    }
 
     std::string get_filename_from_include(const std::string& include_line) {
         auto quote_pos = include_line.find('"');
