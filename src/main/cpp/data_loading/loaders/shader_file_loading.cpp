@@ -222,41 +222,45 @@ namespace nova {
         return filenames;
     }
 
-    std::unordered_map<std::string, shader_definition> load_sources_from_folder(const fs::path &shaders_path, const std::vector<material> &passes) {
+    std::unordered_map<std::string, shader_definition> load_sources_from_folder(const fs::path &shaders_path, const std::vector<material> &materials) {
         std::unordered_map<std::string, shader_definition> sources;
 
-        for(const auto& mat : passes) {
+        for(const auto& mat : materials) {
             auto shader_lines = shader_definition{};
 
             // The pass data is filled from parent passes, so we should have the fragment shader and vertex shader at
             // least
             if(!mat.vertex_shader) {
-                LOG(ERROR) << "No vertex shader set for pass " << mat.name << "! Make sure that this pass or one of its parents sets the vertex shader";
+                LOG(ERROR) << "No vertex shader set for pass " << mat.name << "! Make sure that this material or one of its parents sets the vertex shader";
             } else {
                 shader_lines.vertex_source = load_shader_file(shaders_path / mat.vertex_shader.value(), vertex_extensions);
             }
 
             if(!mat.fragment_shader) {
-                LOG(ERROR) << "No fragment shader set for pass " << mat.name << "! Make sure that this pass or one of its parents sets the fragment shader";
+                LOG(ERROR) << "No fragment shader set for pass " << mat.name << "! Make sure that this material or one of its parents sets the fragment shader";
             } else {
                 shader_lines.fragment_source = load_shader_file(shaders_path / mat.fragment_shader.value(), fragment_extensions);
             }
 
             // Check if we have geometry or tessellation shaders
             if(mat.geometry_shader) {
+                LOG(DEBUG) << "Trying to load geometry shader";
                 shader_lines.geometry_source = load_shader_file(shaders_path / mat.geometry_shader.value(), geometry_extensions);
             }
 
             if(mat.tessellation_control_shader && !mat.tessellation_evaluation_shader) {
-                LOG(WARNING) << "You've set a tessellation control shader but not an evaluation shader. You need both for this pass to perform tessellation, so Nova will not perform tessellation for this pass";
+                LOG(WARNING) << "You've set a tessellation control shader but not an evaluation shader. You need both for this material to perform tessellation, so Nova will not perform tessellation for this material";
 
             } else if(mat.tessellation_evaluation_shader && !mat.tessellation_control_shader) {
-                LOG(WARNING) << "You've set a tessellation evaluation shader but not a control shader. You need both for this pass to perform tessellation, so Nova will not perform tessellation for this pass";
+                LOG(WARNING) << "You've set a tessellation evaluation shader but not a control shader. You need both for this material to perform tessellation, so Nova will not perform tessellation for this material";
 
-            } else {
+            } else if(mat.tessellation_control_shader && mat.tessellation_evaluation_shader){
+                LOG(INFO) << "Trying to load tessellation shaders";
                 shader_lines.tessellation_evaluation_source = load_shader_file(shaders_path / mat.tessellation_evaluation_shader.value(), tess_eval_extensions);
                 shader_lines.tessellation_control_source = load_shader_file(shaders_path / mat.tessellation_control_shader.value(), tess_control_extensions);
             }
+
+            sources[mat.name] = shader_lines;
         }
 
         return sources;

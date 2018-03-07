@@ -111,10 +111,10 @@ namespace nova {
      * in a way I didn't explicitly anticipate
      *
      * \param shaders_path The name of the shaderpack to load the shaders from
-     * \param passes The list of names of shaders to load
+     * \param materials The list of names of shaders to load
      * \return The loaded shaderpack
      */
-    std::unordered_map<std::string, shader_definition> load_sources_from_folder(const fs::path &shaders_path, const std::vector<material> &passes);
+    std::unordered_map<std::string, shader_definition> load_sources_from_folder(const fs::path &shaders_path, const std::vector<material> &materials);
 
     /*!
      * \brief Extracts the filename from the #include line
