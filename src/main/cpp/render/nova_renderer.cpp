@@ -116,7 +116,13 @@ namespace nova {
             LOG(DEBUG) << "We have " << meshes_for_mat.size() << " objects for the material";
             set_opengl_state_for_material(mat);
 
+            //glDisable(GL_DEPTH_TEST);
+            //glDisable(GL_CULL_FACE);
+            //glDisable(GL_BLEND);
+
             for(const auto &geom : meshes_for_mat) {
+                upload_uniforms_for_object(geom, mat);
+
                 if(geom.geometry->has_data()) {
                     upload_model_matrix(geom, mat.program);
                     geom.geometry->set_active();
@@ -125,6 +131,16 @@ namespace nova {
             }
         } else {
             LOG(WARNING) << "No meshes for material " << mat.name;
+        }
+    }
+
+    void nova_renderer::upload_uniforms_for_object(const render_object &object, const material &mat) {
+        switch(object.type) {
+            case geometry_type::gui:
+                upload_gui_model_matrix(*mat.program);
+                break;
+            default:
+                LOG(WARNING) << "We don't handle geometry type " << geometry_type::to_string(object.type);
         }
     }
 
@@ -459,7 +475,10 @@ namespace nova {
         gui_model = glm::scale(gui_model, glm::vec3(1.0 / view_width, 1.0 / view_height, 1.0));
         gui_model = glm::scale(gui_model, glm::vec3(1.0f, -1.0f, 1.0f));
 
+        LOG(DEBUG) << "view_width=" << view_width << " view_height=" << view_height << " scalefactor=" << scalefactor;
+
         auto model_matrix_location = program.get_uniform_location("gbufferModel");
+        LOG(DEBUG) << "Uploading matrix " << gui_model << " to uniform location " << model_matrix_location << " on shader " << program.gl_name;
 
         glUniformMatrix4fv(model_matrix_location, 1, GL_FALSE, &gui_model[0][0]);
     }

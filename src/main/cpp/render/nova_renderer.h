@@ -155,6 +155,8 @@ namespace nova {
         void set_up_blending(const material &mat);
 
         void set_opengl_state_for_material(const material &mat);
+
+        void upload_uniforms_for_object(const render_object &object, const material &mat);
     };
 
     /*!

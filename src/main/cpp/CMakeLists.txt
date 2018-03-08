@@ -147,7 +147,10 @@ set(NOVA_SOURCE
         render/objects/render_object.cpp
         utils/profiler.cpp
         render/objects/material.cpp
-        data_loading/loaders/shader_file_loading.cpp render/render_graph.cpp render/render_graph.h render/objects/opengl/open_gl_context.cpp render/objects/opengl/open_gl_context.h render/objects/opengl/enum_translation.cpp render/objects/opengl/enum_translation.h render/objects/shaders/shaderpack.cpp render/objects/shaders/shaderpack.h)
+        data_loading/loaders/shader_file_loading.cpp render/render_graph.cpp render/render_graph.h
+        render/objects/opengl/open_gl_context.cpp render/objects/opengl/open_gl_context.h
+        render/objects/opengl/enum_translation.cpp render/objects/opengl/enum_translation.h
+        render/objects/shaders/shaderpack.cpp render/objects/shaders/shaderpack.h)
 
 set(NOVA_TEST_SOURCE
         test/main.cpp

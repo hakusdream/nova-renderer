@@ -95,17 +95,29 @@ namespace nova {
     }
 
     void open_gl_context::commit() {
+        if(next_state.program != current_state.program) {
+            glUseProgram(next_state.program);
+        }
+
+        for(const auto& bound_texture : next_state.bound_textures) {
+            glBindTextureUnit(bound_texture.first, bound_texture.second);
+        }
+
+        if(next_state.drawbuffer != current_state.drawbuffer) {
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, next_state.drawbuffer);
+        }
+
         if(next_state.is_blending_enabled != current_state.is_blending_enabled) {
             if(next_state.is_blending_enabled) {
                 glEnable(GL_BLEND);
+
+                if(next_state.src_color != current_state.src_color || next_state.dst_color != current_state.dst_color
+                   || next_state.src_alpha != current_state.src_alpha || next_state.dst_alpha != current_state.dst_alpha) {
+                    glBlendFuncSeparate(next_state.src_color, next_state.dst_color, next_state.src_alpha, next_state.dst_alpha);
+                }
             } else {
                 glDisable(GL_BLEND);
             }
-        }
-
-        if(next_state.src_color != current_state.src_color || next_state.dst_color != current_state.dst_color
-           || next_state.src_alpha != current_state.src_alpha || next_state.dst_alpha != current_state.dst_alpha) {
-            glBlendFuncSeparate(next_state.src_color, next_state.dst_color, next_state.src_alpha, next_state.dst_alpha);
         }
 
         if(next_state.is_culling_eanbled != current_state.is_culling_eanbled) {
@@ -189,18 +201,6 @@ namespace nova {
             } else {
                 glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
             }
-        }
-
-        if(next_state.program != current_state.program) {
-            glUseProgram(next_state.program);
-        }
-
-        for(const auto& bound_texture : next_state.bound_textures) {
-            glBindTextureUnit(bound_texture.first, bound_texture.second);
-        }
-
-        if(next_state.drawbuffer != current_state.drawbuffer) {
-            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, next_state.drawbuffer);
         }
 
         current_state = next_state;
