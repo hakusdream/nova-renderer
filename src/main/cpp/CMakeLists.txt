@@ -149,6 +149,10 @@ set(NOVA_SOURCE
         render/objects/material.cpp
         data_loading/loaders/shader_file_loading.cpp render/render_graph.cpp render/render_graph.h render/objects/opengl/open_gl_context.cpp render/objects/opengl/open_gl_context.h render/objects/opengl/enum_translation.cpp render/objects/opengl/enum_translation.h render/objects/shaders/shaderpack.cpp render/objects/shaders/shaderpack.h)
 
+set(NOVA_TEST_SOURCE
+        test/main.cpp
+        )
+
 if (WIN32)
     set(NOVA_SOURCE ${NOVA_SOURCE} ${NOVA_HEADERS} 3rdparty/renderdocapi/RenderDocManager.cpp data_loading/loaders/shader_zip_loading.cpp)
 endif (WIN32)
@@ -217,3 +221,5 @@ add_custom_command(TARGET nova-renderer
                    COMMAND cp -f "${CMAKE_CURRENT_LIST_DIR}/libnova-renderer.so" "${CMAKE_CURRENT_LIST_DIR}/../../../jars/versions/1.10/1.10-natives")
 endif (UNIX)
 
+add_executable(nova_test ${NOVA_TEST_SOURCE})
+target_link_libraries(nova_test nova-renderer)
