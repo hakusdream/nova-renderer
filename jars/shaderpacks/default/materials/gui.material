@@ -1,9 +1,9 @@
 {
-    "solid_terrain": {
+    "gui": {
         "pass": "forward",
 
-        "vertexShader": "gbuffers_terrain",
-        "fragmentShader": "gbuffers_terrain",
+        "vertexShader": "gui",
+        "fragmentShader": "gui",
 
         "vertexFields": [
             {
@@ -11,12 +11,6 @@
             },
             {
                 "field": "UV0"
-            },
-            {
-                "field": "UV1"
-            },
-            {
-                "field": "Normal"
             },
             {
                 "field": "Color"
@@ -27,12 +21,8 @@
 
         "inputTextures": [
             {
-                "name": "block_color",
+                "name": "gui",
                 "binding": 0
-            },
-            {
-                "name": "lightmap",
-                "binding": 3
             }
         ],
 
@@ -43,7 +33,7 @@
             }
         ],
 
-        "filters": "geometry_type::block AND not_transparent",
+        "filters": "geometry_type::gui",
 
         "depthFunc": "Less",
 

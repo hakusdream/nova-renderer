@@ -65,7 +65,6 @@ namespace nova {
     }
 
     void nova_renderer::render_frame() {
-        LOG(WARNING) << "Rendering frame";
         profiler::log_all_profiler_data();
         player_camera.recalculate_frustum();
 
@@ -74,9 +73,12 @@ namespace nova {
 
         update_per_frame_ubos();
 
-        LOG(WARNING) << "Rendering " << passes_list.size() << " passes";
-        for(const auto& pass : passes_list) {
-            execute_pass(pass);
+        try {
+            for(const auto &pass : passes_list) {
+                execute_pass(pass);
+            }
+        } catch(std::exception& e) {
+            LOG(ERROR) << "Error rendering: " << e.what();
         }
 
         game_window->end_frame();
@@ -96,58 +98,74 @@ namespace nova {
     }
 
     void nova_renderer::execute_pass(const render_pass &pass) {
-        LOG(DEBUG) << "Rendering pass " << pass.name;
-        const auto& materials = materials_by_pass[pass.name];
+        if(materials_by_pass.find(pass.name) == materials_by_pass.end()) {
+            LOG(WARNING) << "No materials found for pass " << pass.name;
+            return;
+        }
+
+        const auto& materials = materials_by_pass.at(pass.name);
         for(const auto& mat : materials) {
             render_geometry_for_material(mat);
         }
     }
 
     void nova_renderer::render_geometry_for_material(const material &mat) {
-        LOG(TRACE) << "Rendering material " << mat.name;
-
-        set_opengl_state_for_material(mat);
-        LOG(TRACE) << "Set OpenGL state for material";
-
         const auto& meshes_for_mat = meshes->get_meshes_for_shader(mat.name);
-        for(const auto& geom : meshes_for_mat) {
-            if(geom.geometry->has_data()) {
-                upload_model_matrix(geom, mat.program);
-                geom.geometry->set_active();
-                geom.geometry->draw();
-            }
-        }
 
+        if(!meshes_for_mat.empty()) {
+            LOG(DEBUG) << "We have " << meshes_for_mat.size() << " objects for the material";
+            set_opengl_state_for_material(mat);
+
+            for(const auto &geom : meshes_for_mat) {
+                if(geom.geometry->has_data()) {
+                    upload_model_matrix(geom, mat.program);
+                    geom.geometry->set_active();
+                    geom.geometry->draw();
+                }
+            }
+        } else {
+            LOG(WARNING) << "No meshes for material " << mat.name;
+        }
     }
 
     void nova_renderer::set_opengl_state_for_material(const material &mat) {
         gl_context.set_default_state();
 
         if(mat.states) {
-            for(const auto& state : mat.states.value()) {
+            for(const auto &state : mat.states.value()) {
                 enable_state(state);
             }
+
+            LOG(TRACE) << "Set states" << std::endl;
         }
 
         uint32_t stencil_ref = 0;
         if(mat.stencil_ref) {
             stencil_ref = mat.stencil_ref.value();
+
+            LOG(TRACE) << "Got stencil ref" << std::endl;
         }
 
         if(mat.front_face) {
             gl_context.set_stencil_test_enabled(true);
             const auto& front_face_stencil = mat.front_face.value();
             set_up_stencil_test(GL_FRONT, front_face_stencil, stencil_ref);
+
+            LOG(TRACE) << "Set stencil frontface operations" << std::endl;
         }
 
         if(mat.back_face) {
             gl_context.set_stencil_test_enabled(true);
             const auto& back_face_stencil = mat.back_face.value();
             set_up_stencil_test(GL_BACK, back_face_stencil, stencil_ref);
+
+            LOG(TRACE) << "Set stencil backface operations" << std::endl;
         }
 
         if(mat.depth_func) {
             gl_context.set_depth_func(compare_op_to_gl(mat.depth_func.value()));
+
+            LOG(TRACE) << "Set depth function" << std::endl;
         }
 
         if(mat.depth_bias || mat.slope_scaled_depth_bias) {
@@ -160,39 +178,51 @@ namespace nova {
                 factor = mat.slope_scaled_depth_bias.value();
             }
             gl_context.set_polygon_offset(factor, units);
+
+            LOG(TRACE) << "Set polygon offset" << std::endl;
         }
 
         gl_context.set_shader(mat.program->gl_name);
+        LOG(TRACE) << "Set shader" << std::endl;
 
         if(mat.input_textures) {
             for(const auto& texture_binding : mat.input_textures.value()) {
                 const auto& texture = textures->get_texture(texture_binding.name);
                 gl_context.bind_texture(texture, texture_binding.binding);
             }
+
+            LOG(TRACE) << "Bound input textures" << std::endl;
         }
 
-        const auto& outputs = mat.output_textures.value();
-        bool draws_to_backbuffer = false;
-        for(const auto& output : outputs) {
-            if(output.name == "Backbuffer") {
-                draws_to_backbuffer = true;
+        if(mat.output_textures) {
+            const auto &outputs = mat.output_textures.value();
+            bool draws_to_backbuffer = false;
+            for(const auto &output : outputs) {
+                if(output.name == "Backbuffer") {
+                    draws_to_backbuffer = true;
+                }
             }
-        }
-        if(draws_to_backbuffer) {
-            gl_context.set_framebuffer(0);
-        } else {
-            if(framebuffers_by_material.find(mat.name) != framebuffers_by_material.end()) {
-                gl_context.set_framebuffer(framebuffers_by_material[mat.name].get_gl_name());
+            if(draws_to_backbuffer) {
+                gl_context.set_framebuffer(0);
             } else {
-                LOG(WARNING) << "No framebuffer for material " << mat.name;
+                if(framebuffers_by_material.find(mat.name) != framebuffers_by_material.end()) {
+                    gl_context.set_framebuffer(framebuffers_by_material[mat.name].get_gl_name());
+                } else {
+                    LOG(WARNING) << "No framebuffer for material " << mat.name << std::endl;
+                }
             }
+
+            LOG(TRACE) << "Set output textures" << std::endl;
         }
 
         if(mat.source_blend_factor || mat.destination_blend_factor || mat.alpha_src || mat.alpha_dst) {
             set_up_blending(mat);
+
+            LOG(TRACE) << "Set up blending" << std::endl;
         }
 
         gl_context.commit();
+        LOG(TRACE) << "Committed OpenGL state" << std::endl;
     }
 
     void nova_renderer::set_up_stencil_test(const GLenum face, const stencil_op_state &front_face_stencil, const uint32_t ref) {

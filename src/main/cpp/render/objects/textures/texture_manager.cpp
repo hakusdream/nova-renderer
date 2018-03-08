@@ -108,11 +108,21 @@ namespace nova {
 
     texture2D &texture_manager::get_texture(std::string texture_name) {
         if(atlases.find(texture_name) != atlases.end()) {
-            return atlases[texture_name];
+            return atlases.at(texture_name);
         }
 
-        auto idx = dynamic_tex_name_to_idx[texture_name];
-        return dynamic_textures[idx];
+        if(dynamic_tex_name_to_idx.find(texture_name) != dynamic_tex_name_to_idx.end()) {
+            auto idx = dynamic_tex_name_to_idx.at(texture_name);
+
+            if(idx < dynamic_textures.size()) {
+                return dynamic_textures[idx];
+            } else {
+                LOG(ERROR) << "Texture with index " << idx << " does not exist";
+            }
+        }
+
+        LOG(WARNING) << "Could not find texture " << texture_name << ". Aborting";
+        throw std::runtime_error("No texture");
     }
 
     int texture_manager::get_max_texture_size() {
